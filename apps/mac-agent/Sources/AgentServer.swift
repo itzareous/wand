@@ -101,8 +101,9 @@ final class ClientSession {
         if message.type == .hello {
             let result = agent.authenticate(message)
             guard result.accepted else {
-                send(ServerMessage(type: .rejected, error: "Pairing code or token not recognised"))
-                return connection.cancel()
+                // Close only after the frame is flushed, or the phone never learns why.
+                return send(ServerMessage(type: .rejected, error: "Pairing code or token not recognised"),
+                            thenClose: true)
             }
             isAuthenticated = true
             send(ServerMessage(type: .welcome, token: result.newToken))
@@ -131,10 +132,12 @@ final class ClientSession {
         }
     }
 
-    private func send(_ message: ServerMessage) {
+    private func send(_ message: ServerMessage, thenClose: Bool = false) {
         guard let data = try? RemoteCoding.encode(message) else { return }
         let metadata = NWProtocolWebSocket.Metadata(opcode: .text)
         let context = NWConnection.ContentContext(identifier: "message", metadata: [metadata])
-        connection.send(content: data, contentContext: context, isComplete: true, completion: .idempotent)
+        let connection = connection
+        connection.send(content: data, contentContext: context, isComplete: true,
+                        completion: .contentProcessed { _ in if thenClose { connection.cancel() } })
     }
 }

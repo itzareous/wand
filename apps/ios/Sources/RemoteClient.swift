@@ -82,7 +82,11 @@ final class RemoteClient {
         connection.receiveMessage { [weak self] data, _, _, error in
             MainActor.assumeIsolated {
                 guard let self, self.connection === connection else { return }
-                if error != nil { return }
+                if let error {
+                    // Agent closed the socket or went away (quit, sleep, Wi-Fi change).
+                    if case .needsPairing = self.state {} else { self.state = .failed(error.localizedDescription) }
+                    return
+                }
                 if let data, let message = try? RemoteCoding.decode(ServerMessage.self, from: data) {
                     self.handle(message)
                 }

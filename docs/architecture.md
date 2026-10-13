@@ -14,6 +14,7 @@ iPhone app (SwiftUI)  ──Bonjour discovery──▶  Desktop agent (menu bar 
 | `apps/ios` | iPhone app: discovers agents, pairs, Touch Bar–style controls | Mac with Xcode |
 | `apps/mac-agent` | macOS menu-bar agent: WebSocket server, executes actions | Mac with Xcode |
 | `apps/windows-agent` | Windows tray agent (not started) | Windows |
+| `tools/remote-cli` | Dev CLI client implementing the phone side of the protocol | any Mac (`swift run`) |
 | `project.yml` | XcodeGen spec producing one `Remote.xcodeproj` with both Apple targets | `xcodegen generate` |
 
 ## Key decisions

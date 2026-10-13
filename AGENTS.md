@@ -10,6 +10,9 @@ xcodegen generate          # creates Remote.xcodeproj (gitignored, never commit 
 open Remote.xcodeproj      # schemes: RemoteiOS, RemoteMacAgent
 cd packages/RemoteKit && swift test
 ```
+
+Test an agent without a phone: `cd tools/remote-cli && swift run remote-cli pair <code>`, then
+`swift run remote-cli status` or `swift run remote-cli volume.up`. The token is kept in `~/.touchbar-remote-cli-token`.
 Set `DEVELOPMENT_TEAM` in `project.yml` for device builds. Edit `project.yml` for any project or Info.plist
 change. Never edit the generated project or Info.plists by hand.
 

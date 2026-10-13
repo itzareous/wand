@@ -8,6 +8,7 @@ apps/ios             iPhone app (SwiftUI)
 apps/mac-agent       macOS menu-bar agent (SwiftUI + Network.framework)
 apps/windows-agent   Windows tray agent (planned)
 packages/RemoteKit   shared protocol (Swift package)
+tools/remote-cli     dev client that talks to an agent like the phone does
 docs/                architecture, wire protocol, roadmap
 project.yml          XcodeGen spec for both Apple apps
 ```
