@@ -1,0 +1,6 @@
+// Copy to Config/Local.xcconfig (gitignored) and fill in.
+// Find your team ID in Xcode → Settings → Accounts, or developer.apple.com → Membership.
+// A free personal team works; apps installed on a device expire after 7 days.
+
+DEVELOPMENT_TEAM = ABCDE12345
+WAND_BUNDLE_PREFIX = com.yourname

@@ -9,3 +9,5 @@ DerivedData/
 .build/
 .swiftpm/
 *.xcworkspace
+# Per-developer signing
+Config/Local.xcconfig

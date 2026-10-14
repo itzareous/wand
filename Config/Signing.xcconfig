@@ -1,0 +1,11 @@
+// Shared signing defaults. Don't put your own team here:
+// copy Local.xcconfig.example to Local.xcconfig (gitignored) and set it there.
+
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+
+// Bundle ids are $(WAND_BUNDLE_PREFIX).wand and $(WAND_BUNDLE_PREFIX).wand.mac.
+// Bundle ids are unique per Apple team, so contributors set their own prefix in Local.xcconfig.
+WAND_BUNDLE_PREFIX = com.qorelly
+
+#include? "Local.xcconfig"

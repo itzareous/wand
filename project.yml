@@ -1,18 +1,18 @@
 # XcodeGen spec — run `xcodegen generate` to create Wand.xcodeproj (not committed).
 name: Wand
 options:
-  bundleIdPrefix: com.qorelly.wand
   createIntermediateGroups: true
   deploymentTarget:
     iOS: "17.0"
     macOS: "14.0"
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
 settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    DEVELOPMENT_TEAM: 39BCSX9U5C # Abdul Ahmad (Personal Team, free: device installs expire after 7 days)
-    CODE_SIGN_STYLE: Automatic
 packages:
   RemoteKit:
     path: packages/RemoteKit
@@ -29,7 +29,7 @@ targets:
         CFBundleDisplayName: Wand
         UILaunchScreen: {}
         CFBundleURLTypes:
-          - CFBundleURLName: com.qorelly.wand
+          - CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
             CFBundleURLSchemes: [wand]
         NSLocalNetworkUsageDescription: Wand finds and controls your computer on this Wi-Fi network.
         NSBonjourServices: [_wand._tcp]
@@ -39,7 +39,7 @@ targets:
           - UIInterfaceOrientationLandscapeRight
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.qorelly.wand
+        PRODUCT_BUNDLE_IDENTIFIER: $(WAND_BUNDLE_PREFIX).wand
         TARGETED_DEVICE_FAMILY: "1"
   WandMac:
     type: application
@@ -56,7 +56,7 @@ targets:
         NSBonjourServices: [_wand._tcp]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.qorelly.wand.mac
+        PRODUCT_BUNDLE_IDENTIFIER: $(WAND_BUNDLE_PREFIX).wand.mac
         PRODUCT_NAME: Wand
         # Not sandboxed on purpose: media-key events and (later) screen capture need it.
         # Distribute outside the Mac App Store, notarized (see docs/roadmap.md).

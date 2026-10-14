@@ -23,7 +23,8 @@ Debug-only test hooks:
   are not found (this shows up as `Module name "" is not a valid identifier`).
 Build the Mac agent signed with a real certificate, never ad-hoc, or the Accessibility grant is lost on every rebuild
 (see docs/architecture.md). Run it from `/Applications/Wand.app`.
-Set `DEVELOPMENT_TEAM` in `project.yml` for device builds. Edit `project.yml` for any project or Info.plist
+Signing lives in `Config/Signing.xcconfig`. Each developer sets their own team and bundle prefix in
+`Config/Local.xcconfig` (gitignored; copy `Config/Local.xcconfig.example`). Never commit a team ID. Edit `project.yml` for any project or Info.plist
 change. Never edit the generated project or Info.plists by hand.
 
 ## Rules
