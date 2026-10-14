@@ -37,6 +37,19 @@
       switcher open→cancel stays put, open→next→choose switches app, disconnect mid-switch releases ⌘
 - [ ] A person tries it from a real iPhone
 
+## Slice 3: Rename to Wand (branch `slice-3-wand`)
+- [x] Apps, bundle ids (`com.qorelly.wand`, `com.qorelly.wand.mac`), schemes, Bonjour `_wand._tcp`, docs
+
+## Slice 4: Mac app (branch `slice-4-mac-app`)
+- [x] Main window that opens on launch (and on reopen from Finder/Spotlight or the menu bar); stays hidden when opened at login
+- [x] First-run setup: welcome → Accessibility (live ✓, no relaunch) → pair (code + QR, moves on by itself) → done
+      (with Open at Login)
+- [x] Home: connection status, paired iPhones with per-device Forget (disconnects at once), permissions, Open at Login
+- [x] Pairing QR `wand://pair?name=…&code=…`; the iPhone handles the `wand` scheme and pairs without typing
+- [x] Seen working by a person on the Mac (2026-10-14)
+- [ ] QR pairing confirmed from a real iPhone camera
+- [ ] App icon for both apps
+
 ## Next slices (in order)
 - **Screenshot** (next): full screen or front app → Mac clipboard + phone (share sheet). Needs Screen Recording.
 - **Trackpad**: move, click and scroll from the phone (the keyboard part is done in slice 2).

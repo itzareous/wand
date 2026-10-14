@@ -1,24 +1,53 @@
 import Foundation
 import Observation
 import RemoteKit
+import ServiceManagement
 
-/// Owns the server, the pairing state and the list of trusted phones.
+struct PairedDevice: Identifiable, Hashable {
+    /// The device's token. Never shown in the UI.
+    let id: String
+    let name: String
+}
+
+/// Owns the server, the pairing state, the list of trusted phones and app-level settings.
 @MainActor
 @Observable
 final class Agent {
     private(set) var isListening = false
     private(set) var pairingCode = Agent.makePairingCode()
-    private(set) var pairedDevices: [String] = []
+    private(set) var pairedDevices: [PairedDevice] = []
+    /// Tokens of phones connected right now.
+    private(set) var connectedTokens: Set<String> = []
     private(set) var hasAccessibility = SystemControl.hasAccessibility
     private(set) var lastError: String?
+    private(set) var opensAtLogin = SMAppService.mainApp.status == .enabled
+    /// The Bonjour service name; the phone matches on it when pairing from a QR code.
+    let serviceName = Host.current().localizedName ?? "Mac"
 
-    // TODO(slice: keychain): tokens live in UserDefaults for the foundation slice; move to Keychain.
-    private let tokensKey = "pairedTokens"
+    var hasCompletedSetup: Bool {
+        didSet { UserDefaults.standard.set(hasCompletedSetup, forKey: Self.setupKey) }
+    }
+
+    /// What the pairing QR code encodes. The iPhone app handles the `wand://` scheme.
+    var pairingURL: URL {
+        var components = URLComponents()
+        components.scheme = "wand"
+        components.host = "pair"
+        components.queryItems = [
+            URLQueryItem(name: "name", value: serviceName),
+            URLQueryItem(name: "code", value: pairingCode),
+        ]
+        return components.url!
+    }
+
+    // TODO(slice: keychain): tokens live in UserDefaults for now; move to Keychain.
+    private static let tokensKey = "pairedTokens"
+    private static let setupKey = "hasCompletedSetup"
     private var tokens: [String: String] {
-        get { UserDefaults.standard.dictionary(forKey: tokensKey) as? [String: String] ?? [:] }
+        get { UserDefaults.standard.dictionary(forKey: Self.tokensKey) as? [String: String] ?? [:] }
         set {
-            UserDefaults.standard.set(newValue, forKey: tokensKey)
-            pairedDevices = newValue.values.sorted()
+            UserDefaults.standard.set(newValue, forKey: Self.tokensKey)
+            pairedDevices = Self.devices(from: newValue)
         }
     }
 
@@ -27,12 +56,11 @@ final class Agent {
     @ObservationIgnored let keyboard = KeyboardControl()
 
     init() {
-        pairedDevices = tokens.values.sorted()
+        hasCompletedSetup = UserDefaults.standard.bool(forKey: Self.setupKey)
+        pairedDevices = Self.devices(from: tokens)
         logPairingCode()
-        // Ask on first launch so the agent shows up in the Accessibility list without hunting for the .app.
-        if !hasAccessibility { SystemControl.requestAccessibility() }
         ShortcutCatalog.validate()
-        let server = AgentServer(agent: self)
+        let server = AgentServer(agent: self, serviceName: serviceName)
         self.server = server
         frontmostApp.onChange = { [weak server] context in
             server?.broadcast(ServerMessage(type: .context, context: context))
@@ -50,8 +78,15 @@ final class Agent {
         return status
     }
 
+    // MARK: Sessions
+
+    func sessionOpened(token: String) {
+        connectedTokens.insert(token)
+    }
+
     /// The phone went away: make sure nothing stays held down.
-    func sessionClosed() {
+    func sessionClosed(token: String?) {
+        if let token { connectedTokens.remove(token) }
         keyboard.releaseIfNeeded()
     }
 
@@ -70,34 +105,65 @@ final class Agent {
         lastError = error
     }
 
+    // MARK: Pairing
+
+    /// Returns the token this session is using (`isNew` when it was just issued for a pairing code), or nil to reject.
+    func authenticate(_ hello: ClientMessage) -> (token: String, isNew: Bool)? {
+        if let token = hello.token, tokens[token] != nil {
+            return (token, false)
+        }
+        if let code = hello.pairingCode, code == pairingCode {
+            let token = UUID().uuidString + UUID().uuidString
+            tokens[token] = hello.deviceName ?? "iPhone"
+            pairingCode = Agent.makePairingCode() // single use
+            logPairingCode()
+            return (token, true)
+        }
+        return nil
+    }
+
+    func forget(_ device: PairedDevice) {
+        tokens[device.id] = nil
+        server?.disconnect(token: device.id)
+    }
+
+    func forgetAllDevices() {
+        let all = tokens.keys
+        tokens = [:]
+        all.forEach { server?.disconnect(token: $0) }
+    }
+
+    // MARK: Settings and permissions
+
     func refreshAccessibility() {
         hasAccessibility = SystemControl.hasAccessibility
     }
 
-    /// Returns the token to send back in `welcome`, or nil to reject.
-    func authenticate(_ hello: ClientMessage) -> (accepted: Bool, newToken: String?) {
-        if let token = hello.token, tokens[token] != nil {
-            return (true, nil)
+    func setOpensAtLogin(_ enabled: Bool) {
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+            lastError = nil
+        } catch {
+            lastError = "Couldn't change Open at Login: \(error.localizedDescription)"
         }
-        if let code = hello.pairingCode, code == pairingCode {
-            let token = UUID().uuidString + UUID().uuidString
-            tokens[token] = hello.deviceName ?? "Phone"
-            pairingCode = Agent.makePairingCode() // single use
-            logPairingCode()
-            return (true, token)
-        }
-        return (false, nil)
+        opensAtLogin = SMAppService.mainApp.status == .enabled
     }
 
-    func forgetAllDevices() {
-        tokens = [:]
-    }
+    // MARK: Private
 
     /// Debug builds print the code so the agent can be paired from the terminal (tools/remote-cli).
     private func logPairingCode() {
         #if DEBUG
         fputs("Pairing code: \(pairingCode)\n", stderr)
         #endif
+    }
+
+    private static func devices(from tokens: [String: String]) -> [PairedDevice] {
+        tokens.map { PairedDevice(id: $0.key, name: $0.value) }.sorted { $0.name < $1.name }
     }
 
     private static func makePairingCode() -> String {

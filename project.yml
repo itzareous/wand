@@ -28,6 +28,9 @@ targets:
       properties:
         CFBundleDisplayName: Wand
         UILaunchScreen: {}
+        CFBundleURLTypes:
+          - CFBundleURLName: com.qorelly.wand
+            CFBundleURLSchemes: [wand]
         NSLocalNetworkUsageDescription: Wand finds and controls your computer on this Wi-Fi network.
         NSBonjourServices: [_wand._tcp]
         UISupportedInterfaceOrientations:

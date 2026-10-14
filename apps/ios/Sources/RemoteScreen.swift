@@ -6,8 +6,12 @@ struct RemoteScreen: View {
     @State private var client: RemoteClient
     @State private var code = ""
 
-    init(agent: DiscoveredAgent) {
+    /// Pair with this code right away (from a scanned QR) instead of asking.
+    private let pairingCode: String?
+
+    init(agent: DiscoveredAgent, pairingCode: String? = nil) {
         _client = State(initialValue: RemoteClient(agent: agent))
+        self.pairingCode = pairingCode
     }
 
     var body: some View {
@@ -32,7 +36,7 @@ struct RemoteScreen: View {
             }
         }
         .navigationTitle(client.agent.name)
-        .onAppear { client.connect(pairingCode: DebugLaunch.pairingCode) }
+        .onAppear { client.connect(pairingCode: pairingCode) }
         .onDisappear { client.disconnect() }
     }
 

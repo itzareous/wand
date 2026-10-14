@@ -30,10 +30,21 @@ enum SystemControl {
 
     /// Synthesising media keys needs the "post events" grant (listed under Accessibility /
     /// Device Control and Data Access). Check that one directly; AXIsProcessTrusted covers the AX API.
-    static var hasAccessibility: Bool { CGPreflightPostEventAccess() }
+    /// AXIsProcessTrusted updates live when the user flips the switch; the post-event preflight can lag
+    /// until relaunch. Either one means event posting is allowed.
+    static var hasAccessibility: Bool { AXIsProcessTrusted() || CGPreflightPostEventAccess() }
 
+    /// Adds Wand to the Accessibility list (with the system prompt) and opens that settings page.
     static func requestAccessibility() {
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        _ = AXIsProcessTrustedWithOptions(options)
         _ = CGRequestPostEventAccess()
+    }
+
+    static func openAccessibilitySettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
+        }
     }
 
     static func perform(_ action: RemoteAction) throws {

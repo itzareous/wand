@@ -9,9 +9,11 @@ final class AgentServer {
     private weak var agent: Agent?
     private var listener: NWListener?
     private var sessions: [ObjectIdentifier: ClientSession] = [:]
+    private let serviceName: String
 
-    init(agent: Agent) {
+    init(agent: Agent, serviceName: String) {
         self.agent = agent
+        self.serviceName = serviceName
     }
 
     func start() {
@@ -23,8 +25,7 @@ final class AgentServer {
 
         do {
             let listener = try NWListener(using: parameters)
-            listener.service = NWListener.Service(name: Host.current().localizedName ?? "Mac",
-                                                  type: RemoteProtocol.bonjourType)
+            listener.service = NWListener.Service(name: serviceName, type: RemoteProtocol.bonjourType)
             listener.stateUpdateHandler = { [weak self] state in
                 MainActor.assumeIsolated { self?.handle(state) }
             }
@@ -54,6 +55,13 @@ final class AgentServer {
         }
     }
 
+    /// Drops every connection using this token (the phone was forgotten).
+    func disconnect(token: String) {
+        for session in sessions.values where session.token == token {
+            session.close()
+        }
+    }
+
     private func accept(_ connection: NWConnection) {
         guard let agent else { return connection.cancel() }
         let session = ClientSession(connection: connection, agent: agent) { [weak self] session in
@@ -69,7 +77,9 @@ final class ClientSession {
     private let connection: NWConnection
     private let agent: Agent
     private let onClose: (ClientSession) -> Void
-    private(set) var isAuthenticated = false
+    /// Set once the hello is accepted.
+    private(set) var token: String?
+    var isAuthenticated: Bool { token != nil }
 
     init(connection: NWConnection, agent: Agent, onClose: @escaping (ClientSession) -> Void) {
         self.connection = connection
@@ -83,7 +93,7 @@ final class ClientSession {
                 guard let self else { return }
                 switch state {
                 case .failed, .cancelled:
-                    self.agent.sessionClosed()
+                    self.agent.sessionClosed(token: self.token)
                     self.onClose(self)
                 default: break
                 }
@@ -108,14 +118,14 @@ final class ClientSession {
 
     private func handle(_ message: ClientMessage) {
         if message.type == .hello {
-            let result = agent.authenticate(message)
-            guard result.accepted else {
+            guard let result = agent.authenticate(message) else {
                 // Close only after the frame is flushed, or the phone never learns why.
                 return send(ServerMessage(type: .rejected, error: "Pairing code or token not recognised"),
                             thenClose: true)
             }
-            isAuthenticated = true
-            send(ServerMessage(type: .welcome, token: result.newToken))
+            token = result.token
+            agent.sessionOpened(token: result.token)
+            send(ServerMessage(type: .welcome, token: result.isNew ? result.token : nil))
             send(ServerMessage(type: .status, status: agent.status()))
             send(ServerMessage(type: .context, context: agent.frontmostApp.context))
             return
@@ -165,6 +175,10 @@ final class ClientSession {
         case .hello:
             break
         }
+    }
+
+    func close() {
+        connection.cancel()
     }
 
     func send(_ message: ServerMessage, thenClose: Bool = false) {

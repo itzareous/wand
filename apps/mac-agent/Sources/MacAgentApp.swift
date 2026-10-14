@@ -1,10 +1,19 @@
+import AppKit
 import SwiftUI
 
 @main
 struct MacAgentApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var agent = Agent()
 
     var body: some Scene {
+        Window("Wand", id: MainWindow.id) {
+            MainWindow(agent: agent, launchedAtLogin: appDelegate.launchedAtLogin)
+                .onAppear { appDelegate.agent = agent }
+        }
+        .windowResizability(.contentSize)
+        .windowStyle(.hiddenTitleBar)
+
         MenuBarExtra("Wand", systemImage: "wand.and.sparkles") {
             AgentMenu(agent: agent)
         }
@@ -12,13 +21,32 @@ struct MacAgentApp: App {
     }
 }
 
+/// Opens the main window when Wand is launched again while running (Finder, Spotlight, Dock).
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    var agent: Agent?
+    /// Captured from the main window so the window can be reopened from AppKit callbacks.
+    static var openMainWindow: (() -> Void)?
+    private(set) var launchedAtLogin = false
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        let event = NSAppleEventManager.shared().currentAppleEvent
+        launchedAtLogin = event?.eventID == kAEOpenApplication
+            && event?.paramDescriptor(forKeyword: keyAEPropData)?.enumCodeValue == keyAELaunchedAsLogInItem
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        if !hasVisibleWindows { Self.openMainWindow?() }
+        return true
+    }
+}
+
 struct AgentMenu: View {
     let agent: Agent
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label(agent.isListening ? "Ready on this network" : "Starting…",
-                  systemImage: agent.isListening ? "wifi" : "wifi.slash")
+            Label(statusText, systemImage: agent.connectedTokens.isEmpty ? "iphone.slash" : "iphone")
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -29,16 +57,12 @@ struct AgentMenu: View {
             }
 
             if !agent.hasAccessibility {
-                Button("Allow media keys (Accessibility)…") { SystemControl.requestAccessibility() }
-                    .buttonStyle(.borderedProminent)
-                    .clipShape(Capsule())
-            }
-
-            if !agent.pairedDevices.isEmpty {
-                Divider()
-                Text("Paired phones").font(.caption).foregroundStyle(.secondary)
-                ForEach(agent.pairedDevices, id: \.self) { Text($0) }
-                Button("Forget all phones", role: .destructive) { agent.forgetAllDevices() }
+                Button("Allow Wand to control this Mac…") {
+                    SystemControl.requestAccessibility()
+                    SystemControl.openAccessibilitySettings()
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
             }
 
             if let error = agent.lastError {
@@ -46,10 +70,23 @@ struct AgentMenu: View {
             }
 
             Divider()
-            Button("Quit") { NSApplication.shared.terminate(nil) }
+            Button("Open Wand…") {
+                openWindow(id: MainWindow.id)
+                NSApp.activate()
+            }
+            Button("Quit Wand") { NSApplication.shared.terminate(nil) }
         }
+        .buttonStyle(.plain)
         .padding(16)
         .frame(width: 260)
         .onAppear { agent.refreshAccessibility() }
+    }
+
+    private var statusText: String {
+        switch agent.connectedTokens.count {
+        case 0: agent.isListening ? "Waiting for your iPhone" : "Starting…"
+        case 1: "iPhone connected"
+        default: "\(agent.connectedTokens.count) iPhones connected"
+        }
     }
 }
