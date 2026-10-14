@@ -12,8 +12,10 @@
 - [x] iOS app in Simulator against the live agent (2026-10-14, `docs/screenshots/01-04`): discovery, pairing screen,
       paired controls showing live Mac volume, relaunch reconnects with the stored token (no code needed)
 - [ ] Landscape single-strip layout (needs a person to rotate the Simulator or a phone)
-- [ ] Accessibility granted, then play/pause, next and previous verified with music playing (needs a person)
-- [ ] Lock screen verified (needs a person, because it locks the Mac)
+- [x] Verified by a person on the Mac (2026-10-14): play/pause, volume, mute and lock all work from the Simulator app
+- [x] Fixed: the media-key permission check now uses `CGPreflightPostEventAccess` (the "post events" grant), and the agent
+      asks for it on first launch
+- [ ] Next and previous track confirmed by a person
 - [ ] Real iPhone on the same Wi-Fi (needs a signing team in `project.yml`)
 
 ## Next slices (in order)

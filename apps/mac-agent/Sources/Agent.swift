@@ -27,6 +27,8 @@ final class Agent {
     init() {
         pairedDevices = tokens.values.sorted()
         logPairingCode()
+        // Ask on first launch so the agent shows up in the Accessibility list without hunting for the .app.
+        if !hasAccessibility { SystemControl.requestAccessibility() }
         let server = AgentServer(agent: self)
         self.server = server
         server.start()

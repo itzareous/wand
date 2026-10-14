@@ -21,6 +21,8 @@ Debug-only test hooks:
   (`xcrun simctl launch <sim> com.qorelly.remote.ios -autoOpen YES -pairingCode NNNNNN`).
 - **XcodeGen**: if it is installed from the release zip, run the real binary and not a symlink, or the settings presets
   are not found (this shows up as `Module name "" is not a valid identifier`).
+Build the Mac agent signed with a real certificate, never ad-hoc, or the Accessibility grant is lost on every rebuild
+(see docs/architecture.md). Run it from `/Applications/RemoteMacAgent.app`.
 Set `DEVELOPMENT_TEAM` in `project.yml` for device builds. Edit `project.yml` for any project or Info.plist
 change. Never edit the generated project or Info.plists by hand.
 

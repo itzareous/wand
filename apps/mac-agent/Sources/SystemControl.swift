@@ -25,11 +25,12 @@ enum SystemControl {
 
     private static let volumeStep = 6
 
-    static var hasAccessibility: Bool { AXIsProcessTrusted() }
+    /// Synthesising media keys needs the "post events" grant (listed under Accessibility /
+    /// Device Control and Data Access). Check that one directly; AXIsProcessTrusted covers the AX API.
+    static var hasAccessibility: Bool { CGPreflightPostEventAccess() }
 
     static func requestAccessibility() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        _ = AXIsProcessTrustedWithOptions(options)
+        _ = CGRequestPostEventAccess()
     }
 
     static func perform(_ action: RemoteAction) throws {

@@ -32,4 +32,11 @@ iPhone app (SwiftUI)  ──Bonjour discovery──▶  Desktop agent (menu bar 
 - **Screen Recording**: later, for screen peek.
 - **Local Network**: prompted automatically.
 
-Rebuilding the agent with a new signature can invalidate the Accessibility grant. Remove and re-add it in System Settings.
+On macOS 27 the Accessibility list is titled **Privacy & Security → Device Control and Data Access**.
+
+**Signing matters for this grant.** Sign the agent with a real certificate (Apple Development locally, Developer ID for release):
+- With an ad-hoc signature (`CODE_SIGN_IDENTITY=-`), the grant is pinned to that exact build, so every rebuild silently loses it.
+- With a certificate, macOS stores a requirement based on the certificate, and the grant survives rebuilds.
+
+If play/pause returns the "allow Accessibility" error even though the switch is on, remove the entry (−), add
+`/Applications/RemoteMacAgent.app` again (+), and then **restart the agent**. A grant only takes effect for a newly launched process.
