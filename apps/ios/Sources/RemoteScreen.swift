@@ -32,7 +32,7 @@ struct RemoteScreen: View {
             }
         }
         .navigationTitle(client.agent.name)
-        .onAppear { client.connect() }
+        .onAppear { client.connect(pairingCode: DebugLaunch.pairingCode) }
         .onDisappear { client.disconnect() }
     }
 

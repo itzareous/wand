@@ -2,9 +2,10 @@ import SwiftUI
 
 struct AgentListView: View {
     @State private var discovery = Discovery()
+    @State private var path: [DiscoveredAgent] = []
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 if discovery.agents.isEmpty {
                     ContentUnavailableView(
@@ -25,5 +26,8 @@ struct AgentListView: View {
             }
         }
         .onAppear { discovery.start() }
+        .onChange(of: discovery.agents) { _, agents in
+            if DebugLaunch.autoOpen, path.isEmpty, let first = agents.first { path = [first] }
+        }
     }
 }

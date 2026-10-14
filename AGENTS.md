@@ -13,6 +13,14 @@ cd packages/RemoteKit && swift test
 
 Test an agent without a phone: `cd tools/remote-cli && swift run remote-cli pair <code>`, then
 `swift run remote-cli status` or `swift run remote-cli volume.up`. The token is kept in `~/.touchbar-remote-cli-token`.
+
+Debug-only test hooks:
+- **Agent**: debug builds print `Pairing code: NNNNNN` to stderr. Run the binary directly to see it:
+  `<DerivedData>/Build/Products/Debug/RemoteMacAgent.app/Contents/MacOS/RemoteMacAgent`.
+- **iOS app**: the launch arguments `-autoOpen YES -pairingCode NNNNNN` open the first agent found and pair it with no taps
+  (`xcrun simctl launch <sim> com.qorelly.remote.ios -autoOpen YES -pairingCode NNNNNN`).
+- **XcodeGen**: if it is installed from the release zip, run the real binary and not a symlink, or the settings presets
+  are not found (this shows up as `Module name "" is not a valid identifier`).
 Set `DEVELOPMENT_TEAM` in `project.yml` for device builds. Edit `project.yml` for any project or Info.plist
 change. Never edit the generated project or Info.plists by hand.
 

@@ -26,6 +26,7 @@ final class Agent {
 
     init() {
         pairedDevices = tokens.values.sorted()
+        logPairingCode()
         let server = AgentServer(agent: self)
         self.server = server
         server.start()
@@ -49,6 +50,7 @@ final class Agent {
             let token = UUID().uuidString + UUID().uuidString
             tokens[token] = hello.deviceName ?? "Phone"
             pairingCode = Agent.makePairingCode() // single use
+            logPairingCode()
             return (true, token)
         }
         return (false, nil)
@@ -56,6 +58,13 @@ final class Agent {
 
     func forgetAllDevices() {
         tokens = [:]
+    }
+
+    /// Debug builds print the code so the agent can be paired from the terminal (tools/remote-cli).
+    private func logPairingCode() {
+        #if DEBUG
+        fputs("Pairing code: \(pairingCode)\n", stderr)
+        #endif
     }
 
     private static func makePairingCode() -> String {

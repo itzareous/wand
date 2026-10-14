@@ -4,9 +4,17 @@
 - [x] RemoteKit protocol + tests (`swift test` passes)
 - [x] Mac agent: Bonjour + WebSocket server, pairing code, media keys, volume, lock
 - [x] iPhone app: discovery, pairing, Touch Bar–style controls, haptics
-- [ ] **First run on the build Mac**: `xcodegen generate`, build both targets, pair a real iPhone,
-      verify every button works. Screenshots/screen recording as proof. Fix compile issues found.
-      (The foundation was typechecked against the macOS SDK only, without Xcode; the iOS target has never been compiled.)
+- [x] Both targets build with Xcode 27 (no source changes needed for compilation)
+- [x] Agent verified end to end with `tools/remote-cli` (2026-10-14): pairing, single-use code, reused code rejected,
+      status, volume up and down, mute on and off, play/pause correctly refused without Accessibility
+- [x] Fixed: `rejected` was dropped because the agent closed the socket before flushing it. The iOS client now
+      shows a failure on disconnect instead of hanging on "Connecting…"
+- [x] iOS app in Simulator against the live agent (2026-10-14, `docs/screenshots/01-04`): discovery, pairing screen,
+      paired controls showing live Mac volume, relaunch reconnects with the stored token (no code needed)
+- [ ] Landscape single-strip layout (needs a person to rotate the Simulator or a phone)
+- [ ] Accessibility granted, then play/pause, next and previous verified with music playing (needs a person)
+- [ ] Lock screen verified (needs a person, because it locks the Mac)
+- [ ] Real iPhone on the same Wi-Fi (needs a signing team in `project.yml`)
 
 ## Next slices (in order)
 1. **Keychain**: move tokens from UserDefaults to Keychain on both sides. Add a "Forget this computer" option on the phone.
