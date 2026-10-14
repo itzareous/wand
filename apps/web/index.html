@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wand — Your Mac, in your pocket</title>
+  <meta name="description" content="Wand turns your iPhone into a smart remote for your Mac: media, volume, shortcuts for the app you're using, typing and app switching, from across the room.">
+  <meta name="theme-color" content="#0b1fd6">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-wand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 15 9"/><path d="m13 7 4 4"/><path d="M18 2.5v3M16.5 4h3M20.5 9v2M19.5 10h2M9.5 3v2M8.5 4h2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2.2"/><rect x="13" y="4" width="7" height="7" rx="2.2"/><rect x="4" y="13" width="7" height="7" rx="2.2"/><rect x="13" y="13" width="7" height="7" rx="2.2"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2.5" y="6" width="19" height="12" rx="3"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8"/></symbol>
+    <symbol id="i-switch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5z"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 5 6v5.5c0 4.4 3 8 7 9.5 4-1.5 7-5.1 7-9.5V6l-7-3Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="3"/><path d="M10.5 18.5h3" stroke-linecap="round"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.5 4.6 2.9 7 7.5 7.5-4.6.5-7 2.9-7.5 7.5-.5-4.6-2.9-7-7.5-7.5 4.6-.5 7-2.9 7.5-7.5Z"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="7.5" width="17" height="9" rx="2.5"/><rect x="4.5" y="9.5" width="10" height="5" rx="1" fill="currentColor"/><path d="M21.5 10.5v3" stroke-linecap="round"/></symbol>
+    <!-- Rolling hills, reused in the hero and the scenes -->
+    <symbol id="hills" viewBox="0 0 1440 340" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="h1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9d46a"/><stop offset="1" stop-color="#7fa63a"/></linearGradient>
+        <linearGradient id="h2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9cc24e"/><stop offset="1" stop-color="#5f8a26"/></linearGradient>
+        <linearGradient id="h3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe08a"/><stop offset="1" stop-color="#8fb446"/></linearGradient>
+      </defs>
+      <path fill="url(#h1)" d="M0 150C220 70 420 60 620 120s420 90 820-20V340H0Z" opacity=".85"/>
+      <path fill="url(#h3)" d="M0 210c260-90 520-120 760-60s420 80 680 10V340H0Z"/>
+      <path fill="url(#h2)" d="M0 270c300-70 560-60 820-20s420 30 620-10V340H0Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- Nav -->
+<header class="nav">
+  <a class="brand" href="#top" aria-label="Wand home">
+    <span class="brand-mark"><svg><use href="#i-wand"/></svg></span>Wand
+  </a>
+  <nav class="nav-links" aria-label="Main">
+    <a href="#features">Features</a>
+    <a href="#apps">Apps</a>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <a class="btn btn-white btn-sm" href="#access">Get early access</a>
+</header>
+
+<main id="top">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="container">
+      <span class="eyebrow"><svg><use href="#i-sparkle"/></svg>iPhone remote for your Mac</span>
+      <h1>Your Mac,<span class="serif">in your pocket.</span></h1>
+      <p class="lede">Wand turns your iPhone into a smart control strip for your Mac. Pause the music, turn it down, and tap shortcuts for whatever app you're using, all from across the room.</p>
+      <div class="hero-cta">
+        <a class="btn btn-black" href="#access"><svg><use href="#i-wand"/></svg>Get early access</a>
+      </div>
+      <div class="hero-meta">
+        <span>iPhone + Mac</span><span>Works over your own Wi-Fi</span><span>No account needed</span>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-bar">
+        <div class="left"><span class="wand-on"><svg><use href="#i-wand"/></svg>Wand</span><span class="hide-sm">iPhone connected</span></div>
+        <div class="right"><svg><use href="#i-wifi"/></svg><svg class="hide-sm"><use href="#i-battery"/></svg><span>09:41</span></div>
+      </div>
+      <div class="phones">
+        <div class="phone cut side"><img src="assets/06-shortcuts-finder.jpg" alt="Wand on iPhone showing Finder shortcuts" loading="lazy"></div>
+        <div class="phone cut"><img src="assets/08-controls-with-tabs.jpg" alt="Wand on iPhone showing controls for the app in front"></div>
+        <div class="phone cut side"><img src="assets/07-keyboard.jpg" alt="Wand keyboard with arrow keys and app switcher" loading="lazy"></div>
+      </div>
+    </div>
+    <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
+    <div class="hero-fade"></div>
+  </div>
+
+  <!-- Overview -->
+  <section id="features" class="center">
+    <div class="container">
+      <h2 class="h2">Everything you reach for, <span class="serif">one tap away</span></h2>
+      <p class="sub">Media, volume, shortcuts for the app in front, a full keyboard and an app switcher. Wand keeps your Mac within reach when you're not at your desk.</p>
+      <div class="chips">
+        <span class="chip"><svg><use href="#i-play"/></svg>Play &amp; pause</span>
+        <span class="chip"><svg><use href="#i-volume"/></svg>Volume</span>
+        <span class="chip"><svg><use href="#i-grid"/></svg>App-aware shortcuts</span>
+        <span class="chip"><svg><use href="#i-keyboard"/></svg>Remote keyboard</span>
+        <span class="chip"><svg><use href="#i-switch"/></svg>App switcher</span>
+        <span class="chip"><svg><use href="#i-lock"/></svg>Lock screen</span>
+        <span class="chip"><svg><use href="#i-qr"/></svg>QR pairing</span>
+        <span class="chip"><svg><use href="#i-wifi"/></svg>Local Wi-Fi only</span>
+        <span class="chip"><svg><use href="#i-shield"/></svg>No account</span>
+      </div>
+
+      <div class="card">
+        <h3 class="h3">Controls that follow your app</h3>
+        <p class="sub">Switch to Chrome and you get back, refresh and tabs. Jump into Figma and it's zoom and tools. Open Keynote and your phone becomes a slide clicker. Wand watches which app is in front and updates your phone the instant you switch.</p>
+        <div class="scene">
+          <span class="tag left"><svg><use href="#i-grid"/></svg>Finder in front</span>
+          <span class="tag right"><svg><use href="#i-grid"/></svg>Terminal in front</span>
+          <div class="phone"><img src="assets/06-shortcuts-finder.jpg" alt="Finder shortcuts on Wand" loading="lazy"></div>
+          <div class="phone"><img src="assets/05-shortcuts-terminal.jpg" alt="Terminal shortcuts on Wand" loading="lazy"></div>
+          <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="h3">Type, switch and lock without getting up</h3>
+        <p class="sub">Type into any app on your Mac as you type on your phone. Use the arrow keys, Return and Esc, flick through open apps with the app switcher, or lock your Mac as you walk away.</p>
+        <div class="scene dusk">
+          <span class="tag left"><svg><use href="#i-keyboard"/></svg>Typing on your Mac</span>
+          <div class="phone"><img src="assets/07-keyboard.jpg" alt="Wand keyboard tab" loading="lazy"></div>
+          <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature grid -->
+  <section class="center">
+    <div class="container">
+      <h2 class="h2">Small remote. <span class="serif">Big shortcuts.</span></h2>
+      <div class="grid">
+        <div class="tile"><span class="ic"><svg><use href="#i-play"/></svg></span><h4>Media keys</h4><p>Play, pause, skip and go back in Music, Spotify, YouTube or anything else that's playing.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-volume"/></svg></span><h4>Volume &amp; mute</h4><p>Turn it up, turn it down or mute, with the live volume level shown on your phone.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-grid"/></svg></span><h4>App-aware shortcuts</h4><p>A shortcut set for the app you're using, with each app's real keyboard shortcuts.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-keyboard"/></svg></span><h4>Remote keyboard</h4><p>Type in any language, emoji included. Edits on your phone are mirrored on your Mac as you go.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-switch"/></svg></span><h4>App switcher</h4><p>Open the app switcher, pick an app with <span class="kbd">←</span> <span class="kbd">→</span> and hit Return.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-qr"/></svg></span><h4>Pair in seconds</h4><p>Scan the QR code on your Mac with your iPhone camera. That's the whole setup.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Apps -->
+  <section id="apps" class="center">
+    <div class="container">
+      <h2 class="h2">Knows the apps <span class="serif">you live in</span></h2>
+      <p class="sub">Shortcut sets for the apps people use all day, and a smart general set for everything else.</p>
+      <div class="apps">
+        <span class="chip">Chrome</span><span class="chip">Safari</span><span class="chip">Arc</span><span class="chip">Firefox</span><span class="chip">Brave</span><span class="chip">Edge</span>
+        <span class="chip">Figma</span><span class="chip">VS Code</span><span class="chip">Cursor</span><span class="chip">Zed</span><span class="chip">Xcode</span>
+        <span class="chip">Terminal</span><span class="chip">iTerm</span><span class="chip">Ghostty</span><span class="chip">Warp</span>
+        <span class="chip">Slack</span><span class="chip">Zoom</span><span class="chip">Teams</span><span class="chip">Mail</span><span class="chip">Notion</span><span class="chip">Notes</span>
+        <span class="chip">Keynote</span><span class="chip">PowerPoint</span><span class="chip">Spotify</span><span class="chip">Finder</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- People -->
+  <section class="center">
+    <div class="container">
+      <h2 class="h2">Made for life <span class="serif">away from the keyboard</span></h2>
+      <div class="people">
+        <div class="person"><span class="emoji">🎤</span><h4>Presenters</h4><p>Move through Keynote or PowerPoint slides from anywhere in the room, and black the screen when you need the room's attention.</p></div>
+        <div class="person"><span class="emoji">🎨</span><h4>Designers</h4><p>Zoom to fit, switch tools and hide the UI in Figma while you step back to look at the work.</p></div>
+        <div class="person"><span class="emoji">💻</span><h4>Developers</h4><p>Run, stop and build in Xcode, stop a runaway command, or clear the terminal while you think.</p></div>
+        <div class="person"><span class="emoji">🎧</span><h4>Music &amp; movies</h4><p>Pause, skip and change the volume from the couch without getting up.</p></div>
+        <div class="person"><span class="emoji">📞</span><h4>Meetings</h4><p>Mute, turn your video off, share your screen or raise your hand in Zoom and Teams.</p></div>
+        <div class="person"><span class="emoji">🛋️</span><h4>Everyday</h4><p>Lock your Mac as you walk away, switch apps, or type a quick search from across the room.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how" class="center">
+    <div class="container">
+      <h2 class="h2">Set up <span class="serif">in a minute</span></h2>
+      <div class="grid">
+        <div class="tile"><span class="ic"><svg><use href="#i-wand"/></svg></span><h4>1. Open Wand on your Mac</h4><p>It lives in your menu bar. A short setup walks you through the one permission it needs.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-qr"/></svg></span><h4>2. Scan the code</h4><p>Point your iPhone camera at the QR code on your Mac. Wand opens and pairs by itself.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-phone"/></svg></span><h4>3. Take control</h4><p>Your Mac shows up whenever you're on the same Wi-Fi. No account, no cloud, no setup again.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Early access -->
+  <section id="access">
+    <div class="container">
+      <div class="access">
+        <h2 class="h2">Wand is coming <span class="serif">soon</span></h2>
+        <p class="sub">We're polishing the last details. Get early access and be the first to try Wand on your iPhone and Mac.</p>
+        <ul>
+          <li><svg><use href="#i-check"/></svg>iPhone app + Mac app</li>
+          <li><svg><use href="#i-check"/></svg>Private: stays on your Wi-Fi</li>
+          <li><svg><use href="#i-check"/></svg>No account or sign-up in the app</li>
+        </ul>
+        <a class="btn btn-white" href="mailto:?subject=Wand%20early%20access" data-todo="replace with the real sign-up link"><svg><use href="#i-wand"/></svg>Get early access</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="center">
+    <div class="container">
+      <h2 class="h2">Questions</h2>
+      <div class="faq">
+        <details>
+          <summary>What do I need?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>An iPhone and a Mac on the same Wi-Fi network. Install Wand on both, open the Mac app, and scan the code. A Windows version is planned.</p>
+        </details>
+        <details>
+          <summary>Does my data go to the cloud?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>No. Your iPhone talks straight to your Mac over your local network. There's no account, no server in the middle, and nothing about what you type or tap leaves your Wi-Fi.</p>
+        </details>
+        <details>
+          <summary>Why does the Mac app ask for Accessibility permission?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>To press keys on your behalf: play and pause, shortcuts, typing and the app switcher. macOS requires your permission for that, and Wand only presses keys when you tap something on your phone.</p>
+        </details>
+        <details>
+          <summary>Can someone else on my Wi-Fi control my Mac?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>Only phones you've paired. Pairing needs the one-time code shown on your Mac, and you can forget any phone from the Wand window at any time.</p>
+        </details>
+        <details>
+          <summary>Which apps have shortcuts?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>Browsers, Figma, VS Code, Cursor, Zed, Xcode, Terminal and other terminals, Slack, Zoom, Teams, Finder, Mail, Notion, Notes, Keynote, PowerPoint and Spotify, with more on the way. Every other app gets a general set: Mission Control, app switching, Spotlight, full screen, undo and redo.</p>
+        </details>
+        <details>
+          <summary>What's next?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>Screenshots to your clipboard in one tap, a trackpad mode, now-playing info with artwork, and Windows support.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container foot">
+    <a class="brand" href="#top"><span class="brand-mark"><svg><use href="#i-wand"/></svg></span>Wand</a>
+    <nav><a href="#features">Features</a><a href="#faq">FAQ</a><a href="#access">Early access</a></nav>
+    <span>© 2026 Wand</span>
+  </div>
+</footer>
+
+</body>
+</html>
