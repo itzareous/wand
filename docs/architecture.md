@@ -15,7 +15,7 @@ iPhone app (SwiftUI)  ──Bonjour discovery──▶  Desktop agent (menu bar 
 | `apps/mac-agent` | macOS menu-bar agent: WebSocket server, executes actions | Mac with Xcode |
 | `apps/windows-agent` | Windows tray agent (not started) | Windows |
 | `tools/remote-cli` | Dev CLI client implementing the phone side of the protocol | any Mac (`swift run`) |
-| `project.yml` | XcodeGen spec producing one `Remote.xcodeproj` with both Apple targets | `xcodegen generate` |
+| `project.yml` | XcodeGen spec producing one `Wand.xcodeproj` with both Apple targets | `xcodegen generate` |
 
 ## Key decisions
 - **Native Swift, not a PWA.** It unlocks Lock Screen and Control Center controls, widgets, Live Activities,
@@ -39,4 +39,4 @@ On macOS 27 the Accessibility list is titled **Privacy & Security → Device Con
 - With a certificate, macOS stores a requirement based on the certificate, and the grant survives rebuilds.
 
 If play/pause returns the "allow Accessibility" error even though the switch is on, remove the entry (−), add
-`/Applications/RemoteMacAgent.app` again (+), and then **restart the agent**. A grant only takes effect for a newly launched process.
+`/Applications/Wand.app` again (+), and then **restart the agent**. A grant only takes effect for a newly launched process.

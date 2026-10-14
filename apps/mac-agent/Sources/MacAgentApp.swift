@@ -5,7 +5,7 @@ struct MacAgentApp: App {
     @State private var agent = Agent()
 
     var body: some Scene {
-        MenuBarExtra("Remote", systemImage: "appletvremote.gen4") {
+        MenuBarExtra("Wand", systemImage: "wand.and.sparkles") {
             AgentMenu(agent: agent)
         }
         .menuBarExtraStyle(.window)

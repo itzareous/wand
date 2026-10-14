@@ -38,7 +38,7 @@ struct RemoteScreen: View {
 
     private func pairing(message: String?) -> some View {
         VStack(spacing: 16) {
-            Text("Enter the 6-digit code shown in the Remote menu on \(client.agent.name).")
+            Text("Enter the 6-digit code shown in the Wand menu on \(client.agent.name).")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             TextField("000000", text: $code)

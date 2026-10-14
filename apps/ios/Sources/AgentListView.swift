@@ -11,7 +11,7 @@ struct AgentListView: View {
                     ContentUnavailableView(
                         "Looking for computers",
                         systemImage: "desktopcomputer",
-                        description: Text(discovery.error ?? "Open the Remote agent on your Mac or PC. Both devices need to be on the same Wi-Fi.")
+                        description: Text(discovery.error ?? "Open Wand on your Mac or PC. Both devices need to be on the same Wi-Fi.")
                     )
                 }
                 ForEach(discovery.agents) { agent in
@@ -20,7 +20,7 @@ struct AgentListView: View {
                     }
                 }
             }
-            .navigationTitle("Remote")
+            .navigationTitle("Wand")
             .navigationDestination(for: DiscoveredAgent.self) { agent in
                 RemoteScreen(agent: agent)
             }

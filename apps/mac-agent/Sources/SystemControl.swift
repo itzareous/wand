@@ -10,7 +10,7 @@ enum SystemControlError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .needsAccessibility: "Allow the Remote agent in System Settings → Privacy & Security → Accessibility."
+        case .needsAccessibility: "Allow Wand in System Settings → Privacy & Security → Accessibility."
         case .shortcutUnavailable: "That shortcut isn't available for the app in front any more."
         case .scriptFailed(let message): message
         }

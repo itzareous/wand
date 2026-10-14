@@ -5,7 +5,7 @@ import Foundation
 public enum RemoteProtocol {
     public static let version = 1
     /// Bonjour service type the desktop agent advertises (max 15 chars before `._tcp`).
-    public static let bonjourType = "_tbremote._tcp"
+    public static let bonjourType = "_wand._tcp"
 }
 
 /// Every action the phone can ask a desktop agent to perform.

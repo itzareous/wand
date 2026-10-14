@@ -1,7 +1,7 @@
-# XcodeGen spec — run `xcodegen generate` to create Remote.xcodeproj (not committed).
-name: Remote
+# XcodeGen spec — run `xcodegen generate` to create Wand.xcodeproj (not committed).
+name: Wand
 options:
-  bundleIdPrefix: com.qorelly.remote
+  bundleIdPrefix: com.qorelly.wand
   createIntermediateGroups: true
   deploymentTarget:
     iOS: "17.0"
@@ -17,7 +17,7 @@ packages:
   RemoteKit:
     path: packages/RemoteKit
 targets:
-  RemoteiOS:
+  Wand:
     type: application
     platform: iOS
     sources: [apps/ios/Sources]
@@ -26,19 +26,19 @@ targets:
     info:
       path: apps/ios/Info.plist
       properties:
-        CFBundleDisplayName: Remote
+        CFBundleDisplayName: Wand
         UILaunchScreen: {}
-        NSLocalNetworkUsageDescription: Remote finds and controls your computer on this Wi-Fi network.
-        NSBonjourServices: [_tbremote._tcp]
+        NSLocalNetworkUsageDescription: Wand finds and controls your computer on this Wi-Fi network.
+        NSBonjourServices: [_wand._tcp]
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.qorelly.remote.ios
+        PRODUCT_BUNDLE_IDENTIFIER: com.qorelly.wand
         TARGETED_DEVICE_FAMILY: "1"
-  RemoteMacAgent:
+  WandMac:
     type: application
     platform: macOS
     sources: [apps/mac-agent/Sources]
@@ -47,13 +47,14 @@ targets:
     info:
       path: apps/mac-agent/Info.plist
       properties:
-        CFBundleDisplayName: Remote Agent
+        CFBundleDisplayName: Wand
         LSUIElement: true
-        NSLocalNetworkUsageDescription: Remote Agent lets your phone control this Mac over Wi-Fi.
-        NSBonjourServices: [_tbremote._tcp]
+        NSLocalNetworkUsageDescription: Wand lets your phone control this Mac over Wi-Fi.
+        NSBonjourServices: [_wand._tcp]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.qorelly.remote.agent
+        PRODUCT_BUNDLE_IDENTIFIER: com.qorelly.wand.mac
+        PRODUCT_NAME: Wand
         # Not sandboxed on purpose: media-key events and (later) screen capture need it.
         # Distribute outside the Mac App Store, notarized (see docs/roadmap.md).
         ENABLE_APP_SANDBOX: NO

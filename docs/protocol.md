@@ -3,7 +3,7 @@
 Source of truth in code: `packages/RemoteKit/Sources/RemoteKit/RemoteProtocol.swift`. Change both together.
 
 ## Transport
-- The desktop agent advertises Bonjour/mDNS service **`_tbremote._tcp`**, named after the computer.
+- The desktop agent advertises Bonjour/mDNS service **`_wand._tcp`**, named after the computer.
 - The phone connects with a **WebSocket** (Network.framework) and sends **one JSON object per text frame**.
 - Plain WebSocket on the LAN for v1. TLS is on the roadmap.
 
