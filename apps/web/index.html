@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Wand — Your Mac, in your pocket</title>
-  <meta name="description" content="Wand turns your iPhone into a smart remote for your Mac: media, volume, shortcuts for the app you're using, typing and app switching, from across the room.">
+  <meta name="description" content="Wand turns your iPhone into a smart remote for your Mac (media, volume, shortcuts for the app you're using, typing) and lets you dictate into any app with your voice.">
   <meta name="theme-color" content="#0b1fd6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,9 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-wand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 15 9"/><path d="m13 7 4 4"/><path d="M18 2.5v3M16.5 4h3M20.5 9v2M19.5 10h2M9.5 3v2M8.5 4h2"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M16 7l2 2M14 9l2 2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></symbol>
     <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2.2"/><rect x="13" y="4" width="7" height="7" rx="2.2"/><rect x="4" y="13" width="7" height="7" rx="2.2"/><rect x="13" y="13" width="7" height="7" rx="2.2"/></symbol>
@@ -52,6 +55,7 @@
   </a>
   <nav class="nav-links" aria-label="Main">
     <a href="#features">Features</a>
+    <a href="#dictation">Dictation</a>
     <a href="#apps">Apps</a>
     <a href="#how">How it works</a>
     <a href="#faq">FAQ</a>
@@ -66,7 +70,7 @@
     <div class="container">
       <span class="eyebrow"><svg><use href="#i-sparkle"/></svg>iPhone remote for your Mac</span>
       <h1>Your Mac,<span class="serif">in your pocket.</span></h1>
-      <p class="lede">Wand turns your iPhone into a smart control strip for your Mac. Pause the music, turn it down, and tap shortcuts for whatever app you're using, all from across the room.</p>
+      <p class="lede">Wand turns your iPhone into a smart control strip for your Mac. Pause the music, tap shortcuts for whatever app you're using, or just speak and watch your words appear, from across the room or right at your desk.</p>
       <div class="hero-cta">
         <a class="btn btn-black" href="#access"><svg><use href="#i-wand"/></svg>Get early access</a>
       </div>
@@ -83,7 +87,7 @@
       <div class="phones">
         <div class="phone cut side"><img src="assets/06-shortcuts-finder.jpg" alt="Wand on iPhone showing Finder shortcuts" loading="lazy"></div>
         <div class="phone cut"><img src="assets/08-controls-with-tabs.jpg" alt="Wand on iPhone showing controls for the app in front"></div>
-        <div class="phone cut side"><img src="assets/07-keyboard.jpg" alt="Wand keyboard with arrow keys and app switcher" loading="lazy"></div>
+        <div class="phone cut side"><img src="assets/09-keyboard-hold-to-talk.jpg" alt="Wand keyboard with arrow keys and app switcher" loading="lazy"></div>
       </div>
     </div>
     <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
@@ -99,6 +103,7 @@
         <span class="chip"><svg><use href="#i-play"/></svg>Play &amp; pause</span>
         <span class="chip"><svg><use href="#i-volume"/></svg>Volume</span>
         <span class="chip"><svg><use href="#i-grid"/></svg>App-aware shortcuts</span>
+        <span class="chip"><svg><use href="#i-mic"/></svg>Voice dictation</span>
         <span class="chip"><svg><use href="#i-keyboard"/></svg>Remote keyboard</span>
         <span class="chip"><svg><use href="#i-switch"/></svg>App switcher</span>
         <span class="chip"><svg><use href="#i-lock"/></svg>Lock screen</span>
@@ -124,10 +129,107 @@
         <p class="sub">Type into any app on your Mac as you type on your phone. Use the arrow keys, Return and Esc, flick through open apps with the app switcher, or lock your Mac as you walk away.</p>
         <div class="scene dusk">
           <span class="tag left"><svg><use href="#i-keyboard"/></svg>Typing on your Mac</span>
-          <div class="phone"><img src="assets/07-keyboard.jpg" alt="Wand keyboard tab" loading="lazy"></div>
+          <div class="phone"><img src="assets/09-keyboard-hold-to-talk.jpg" alt="Wand keyboard tab" loading="lazy"></div>
           <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Dictation -->
+  <section id="dictation" class="center">
+    <div class="container">
+      <h2 class="h2">Speak, <span class="dim">don't type.</span></h2>
+      <p class="sub">Hold a key, say what you mean, let go. Wand types it into whatever app you're using: messages, emails, docs, prompts, code comments.</p>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="label">Typing</span>
+          <div>
+            <div class="num">~40<small>wpm</small></div>
+            <div class="bar"><i style="width:27%"></i></div>
+            <div class="note">A typical typing speed</div>
+          </div>
+        </div>
+        <div class="stat voice">
+          <span class="label">Speaking with Wand</span>
+          <div>
+            <div class="num">~150<small>wpm</small></div>
+            <div class="bar"><i style="width:100%"></i></div>
+            <div class="note">How fast most people talk, roughly 3–4× faster than typing</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rows">
+        <div class="row">
+          <div class="copy">
+            <h3>Hold ⌥ and talk</h3>
+            <p>Hold the right Option key anywhere on your Mac, speak, and let go. A small pill shows Wand listening, then your words land right where your cursor is.</p>
+            <ul class="points">
+              <li><svg><use href="#i-check"/></svg>Works in any app with a text field</li>
+              <li><svg><use href="#i-check"/></svg>Types for you, so your clipboard stays untouched</li>
+              <li><svg><use href="#i-check"/></svg>Works on its own, no iPhone needed</li>
+            </ul>
+          </div>
+          <div class="visual">
+            <div class="mac-demo">
+              <div class="window">
+                <div class="bar"><i></i><i></i><i></i>Notes</div>
+                <div class="body">Can you send me the deck before the 3pm call? I want to go through the pricing slide first<span class="caret"></span></div>
+              </div>
+              <div class="controls">
+                <span class="keycap"><span>⌥</span><b>option</b></span>
+                <span class="hud"><span class="bars"><i></i><i></i><i></i><i></i><i></i></span>Listening…</span>
+              </div>
+            </div>
+            <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="copy">
+            <h3>Or talk into your phone</h3>
+            <p>On the couch, at the whiteboard, or across the room: hold <b>Hold to talk</b> on your iPhone and speak. Your phone listens, and your Mac types.</p>
+            <ul class="points">
+              <li><svg><use href="#i-check"/></svg>Uses your iPhone's microphone, close to your voice</li>
+              <li><svg><use href="#i-check"/></svg>Same settings as your Mac, set up once</li>
+              <li><svg><use href="#i-check"/></svg>Live level meter and haptics while you talk</li>
+            </ul>
+          </div>
+          <div class="visual dusk">
+            <div class="phone" style="width:230px;transform:translateY(90px)"><img src="assets/09-keyboard-hold-to-talk.jpg" alt="Hold to talk on Wand for iPhone" loading="lazy"></div>
+            <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="copy">
+            <h3>Your engine, your choice</h3>
+            <p>Pick the transcription that fits you. Use a top cloud model with your own API key, or keep everything on your Mac with private, offline recognition.</p>
+            <ul class="points">
+              <li><svg><use href="#i-check"/></svg>OpenAI, Groq, or any OpenAI-compatible server</li>
+              <li><svg><use href="#i-check"/></svg>Bring your own key or your own infrastructure</li>
+              <li><svg><use href="#i-check"/></svg>Switch anytime in the Wand window</li>
+            </ul>
+          </div>
+          <div class="visual">
+            <div class="engines">
+              <div class="engine on"><span class="radio"></span><div><h5>Cloud</h5><p>Most accurate. Your audio goes only to the provider you choose.</p><div class="tags"><span>OpenAI</span><span>Groq</span><span>Your own server</span></div></div></div>
+              <div class="engine"><span class="radio"></span><div><h5>On this Mac</h5><p>Private and free. Your audio never leaves your Mac.</p><div class="tags"><span>Offline</span><span>No key needed</span></div></div></div>
+            </div>
+            <svg class="hills" aria-hidden="true"><use href="#hills"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="tile"><span class="ic"><svg><use href="#i-shield"/></svg></span><h4>No Wand servers</h4><p>There's no Wand account and no Wand cloud. Your audio goes to your Mac, then to the engine you picked.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-key"/></svg></span><h4>Keys in your Keychain</h4><p>Your API key is stored in the macOS Keychain, never in a file and never shared.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-trash"/></svg></span><h4>Audio isn't kept</h4><p>Each recording is deleted right after it's transcribed. Wand doesn't keep a history of what you said.</p></div>
+      </div>
+
+      <p class="sub" style="margin-top:36px">Coming next: AI clean-up that removes "um"s and fixes punctuation <span class="soon">Soon</span> &nbsp; Voice commands like "next slide" <span class="soon">Soon</span></p>
     </div>
   </section>
 
@@ -141,6 +243,7 @@
         <div class="tile"><span class="ic"><svg><use href="#i-grid"/></svg></span><h4>App-aware shortcuts</h4><p>A shortcut set for the app you're using, with each app's real keyboard shortcuts.</p></div>
         <div class="tile"><span class="ic"><svg><use href="#i-keyboard"/></svg></span><h4>Remote keyboard</h4><p>Type in any language, emoji included. Edits on your phone are mirrored on your Mac as you go.</p></div>
         <div class="tile"><span class="ic"><svg><use href="#i-switch"/></svg></span><h4>App switcher</h4><p>Open the app switcher, pick an app with <span class="kbd">←</span> <span class="kbd">→</span> and hit Return.</p></div>
+        <div class="tile"><span class="ic"><svg><use href="#i-mic"/></svg></span><h4>Voice dictation</h4><p>Hold Right ⌥ on your Mac or Hold to talk on your phone, and your words are typed into the app in front.</p></div>
         <div class="tile"><span class="ic"><svg><use href="#i-qr"/></svg></span><h4>Pair in seconds</h4><p>Scan the QR code on your Mac with your iPhone camera. That's the whole setup.</p></div>
       </div>
     </div>
@@ -149,8 +252,8 @@
   <!-- Apps -->
   <section id="apps" class="center">
     <div class="container">
-      <h2 class="h2">Knows the apps <span class="serif">you live in</span></h2>
-      <p class="sub">Shortcut sets for the apps people use all day, and a smart general set for everything else.</p>
+      <h2 class="h2">Works everywhere <span class="serif">you work</span></h2>
+      <p class="sub">Dictation types into any app with a text field. Shortcut sets cover the apps people use all day, and a general set covers everything else.</p>
       <div class="apps">
         <span class="chip">Chrome</span><span class="chip">Safari</span><span class="chip">Arc</span><span class="chip">Firefox</span><span class="chip">Brave</span><span class="chip">Edge</span>
         <span class="chip">Figma</span><span class="chip">VS Code</span><span class="chip">Cursor</span><span class="chip">Zed</span><span class="chip">Xcode</span>
@@ -215,7 +318,7 @@
         </details>
         <details>
           <summary>Does my data go to the cloud?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
-          <p>No. Your iPhone talks straight to your Mac over your local network. There's no account, no server in the middle, and nothing about what you type or tap leaves your Wi-Fi.</p>
+          <p>Your iPhone talks straight to your Mac over your local network, with no account and no Wand server in the middle. The only exception is dictation with a cloud engine: your recording is sent to the provider you chose (OpenAI, Groq or your own server) to be transcribed. Choose On this Mac to keep audio entirely on your Mac.</p>
         </details>
         <details>
           <summary>Why does the Mac app ask for Accessibility permission?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
@@ -226,12 +329,20 @@
           <p>Only phones you've paired. Pairing needs the one-time code shown on your Mac, and you can forget any phone from the Wand window at any time.</p>
         </details>
         <details>
+          <summary>How does dictation work?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>Hold the right Option key on your Mac (or Hold to talk on your iPhone), speak, and let go. Wand turns your speech into text with the engine you chose and types it where your cursor is. It works in any app, even without pairing a phone.</p>
+        </details>
+        <details>
+          <summary>Which transcription engine should I use?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
+          <p>Cloud is the most accurate: bring an API key from OpenAI or Groq, or point Wand at any OpenAI-compatible server you run. On this Mac is private and free, using the Mac's built-in on-device recognition, and it's less accurate with names and jargon. You can switch anytime.</p>
+        </details>
+        <details>
           <summary>Which apps have shortcuts?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
           <p>Browsers, Figma, VS Code, Cursor, Zed, Xcode, Terminal and other terminals, Slack, Zoom, Teams, Finder, Mail, Notion, Notes, Keynote, PowerPoint and Spotify, with more on the way. Every other app gets a general set: Mission Control, app switching, Spotlight, full screen, undo and redo.</p>
         </details>
         <details>
           <summary>What's next?<span class="plus"><svg><use href="#i-plus"/></svg></span></summary>
-          <p>Screenshots to your clipboard in one tap, a trackpad mode, now-playing info with artwork, and Windows support.</p>
+          <p>AI clean-up for dictation, voice commands, screenshots to your clipboard in one tap, a trackpad mode, now-playing info with artwork, and Windows support.</p>
         </details>
       </div>
     </div>
