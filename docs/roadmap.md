@@ -56,7 +56,10 @@
 - [x] On-screen pill: listening level meter, transcribing, errors. Pressing another key while holding ⌥ cancels.
 - [x] Cloud request verified against a local mock of `/audio/transcriptions` (upload shape, errors, missing key)
 - [ ] A person dictates for real with each engine
-- Next: dictate from the phone (push-to-talk), optional LLM cleanup of the transcript, voice commands
+- [x] Dictate from the phone: hold-to-talk records on the iPhone, the Mac transcribes with its engine and types
+      (protocol `dictate`, `status.dictationReady`). Verified end to end with the on-device engine into TextEdit.
+- [ ] A person tries hold-to-talk on a real iPhone
+- Next: optional LLM cleanup of the transcript, voice commands
 
 ## Next slices (in order)
 - **Screenshot** (next): full screen or front app → Mac clipboard + phone (share sheet). Needs Screen Recording.

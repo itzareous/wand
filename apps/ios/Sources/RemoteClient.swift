@@ -24,9 +24,12 @@ final class RemoteClient {
     /// The app in front on the computer and its shortcuts; pushed by the agent on every app switch.
     private(set) var context: AppContext?
     private(set) var lastError: String?
+    /// The computer is transcribing/typing audio we sent.
+    private(set) var isDictating = false
 
     @ObservationIgnored private var connection: NWConnection?
     @ObservationIgnored private var pendingPairingCode: String?
+    @ObservationIgnored private var pendingDictationId: String?
 
     init(agent: DiscoveredAgent) {
         self.agent = agent
@@ -59,6 +62,8 @@ final class RemoteClient {
     func disconnect() {
         connection?.cancel()
         connection = nil
+        isDictating = false
+        pendingDictationId = nil
     }
 
     func send(_ action: RemoteAction) {
@@ -81,6 +86,19 @@ final class RemoteClient {
         send(ClientMessage.appSwitcher(action))
     }
 
+    func dictate(_ audio: Data) {
+        let message = ClientMessage.dictate(audio: audio)
+        pendingDictationId = message.id
+        isDictating = true
+        lastError = nil
+        send(message)
+    }
+
+    /// Show a problem that happened on the phone (e.g. microphone denied).
+    func report(_ error: String) {
+        lastError = error
+    }
+
     private func handle(_ connectionState: NWConnection.State) {
         switch connectionState {
         case .ready:
@@ -101,6 +119,7 @@ final class RemoteClient {
             MainActor.assumeIsolated {
                 guard let self, self.connection === connection else { return }
                 if let error {
+                    self.isDictating = false
                     // Agent closed the socket or went away (quit, sleep, Wi-Fi change).
                     if case .needsPairing = self.state {} else { self.state = .failed(error.localizedDescription) }
                     return
@@ -125,6 +144,10 @@ final class RemoteClient {
             state = .needsPairing(message: message.error ?? "That code didn't work.")
         case .ack:
             lastError = message.ok == false ? message.error : nil
+            if message.id != nil, message.id == pendingDictationId {
+                isDictating = false
+                pendingDictationId = nil
+            }
         case .status:
             status = message.status
         case .context:

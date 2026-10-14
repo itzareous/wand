@@ -16,6 +16,9 @@ struct KeyboardPanel: View {
 
     var body: some View {
         VStack(spacing: 16) {
+            HoldToTalkButton(client: client)
+                .padding(8)
+                .background(Capsule().fill(Color(white: 0.08)))
             typingField
             switcherStrip
             arrowPad

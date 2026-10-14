@@ -32,6 +32,7 @@ targets:
           - CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
             CFBundleURLSchemes: [wand]
         NSLocalNetworkUsageDescription: Wand finds and controls your computer on this Wi-Fi network.
+        NSMicrophoneUsageDescription: Hold to talk records your voice so your computer can type what you said.
         NSBonjourServices: [_wand._tcp]
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

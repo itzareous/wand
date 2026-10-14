@@ -51,3 +51,11 @@ import Testing
     #expect(try json(.pressKey(.return)) == #"{"id":"1","key":"return","type":"pressKey"}"#)
     #expect(try json(.appSwitcher(.next)) == #"{"id":"1","switcher":"next","type":"appSwitcher"}"#)
 }
+
+@Test func dictateCarriesAudioAsBase64() throws {
+    var message = ClientMessage.dictate(audio: Data([0, 1, 2, 255]))
+    message.id = "1"
+    let json = String(decoding: try RemoteCoding.encode(message), as: UTF8.self)
+    #expect(json == #"{"audio":"AAEC\/w==","audioFormat":"m4a","id":"1","type":"dictate"}"#)
+    #expect(try RemoteCoding.decode(ClientMessage.self, from: Data(json.utf8)).audio == Data([0, 1, 2, 255]))
+}

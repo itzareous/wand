@@ -20,6 +20,7 @@ final class AgentServer {
         let parameters = NWParameters.tcp
         let webSocket = NWProtocolWebSocket.Options()
         webSocket.autoReplyPing = true
+        webSocket.maximumMessageSize = 16 * 1024 * 1024 // phone dictation audio
         parameters.defaultProtocolStack.applicationProtocols.insert(webSocket, at: 0)
         parameters.includePeerToPeer = true
 
@@ -169,6 +170,19 @@ final class ClientSession {
                 send(ServerMessage(type: .ack, id: message.id, ok: true))
             } catch {
                 send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
+            }
+        case .dictate:
+            guard let audio = message.audio, !audio.isEmpty else {
+                return send(ServerMessage(type: .ack, id: message.id, ok: false, error: "No audio received"))
+            }
+            Task {
+                do {
+                    try await agent.dictation.dictate(audio: audio, format: message.audioFormat ?? "m4a")
+                    send(ServerMessage(type: .ack, id: message.id, ok: true))
+                } catch {
+                    send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
+                }
+                send(ServerMessage(type: .status, status: agent.status()))
             }
         case .statusRequest:
             send(ServerMessage(type: .status, status: agent.status()))

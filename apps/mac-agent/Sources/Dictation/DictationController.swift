@@ -66,6 +66,32 @@ final class DictationController {
         updateMonitors()
     }
 
+    /// An engine is usable: on-device needs nothing; cloud needs a key.
+    var isConfigured: Bool { engine == .onDevice || !apiKey.isEmpty }
+
+    enum PhoneDictationError: LocalizedError {
+        case busy
+        var errorDescription: String? { "Wand is already dictating on the Mac. Try again in a moment." }
+    }
+
+    /// Audio recorded on the phone: transcribe with this Mac's engine and type it. Throws so the phone can show why.
+    func dictate(audio: Data, format: String) async throws {
+        guard phase != .recording, phase != .transcribing else { throw PhoneDictationError.busy }
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("wand-phone-\(UUID().uuidString).\(format.isEmpty ? "m4a" : format)")
+        try audio.write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+        hideTask?.cancel()
+        phase = .transcribing
+        hud.show()
+        do {
+            try await transcribeAndType(url)
+        } catch {
+            fail(error.localizedDescription)
+            throw error
+        }
+    }
+
     var microphoneStatus: AVAuthorizationStatus { AVCaptureDevice.authorizationStatus(for: .audio) }
 
     func requestMicrophone() {
@@ -134,18 +160,21 @@ final class DictationController {
         }
         NSSound(named: "Pop")?.play()
         phase = .transcribing
-        let engine = engine, baseURL = baseURL, model = model, apiKey = apiKey
         Task {
             defer { try? FileManager.default.removeItem(at: url) }
             do {
-                let text = try await Self.transcribe(url, engine: engine, baseURL: baseURL, model: model, apiKey: apiKey)
-                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty { try keyboard.type(trimmed) }
-                finish()
+                try await transcribeAndType(url)
             } catch {
                 fail(error.localizedDescription)
             }
         }
+    }
+
+    private func transcribeAndType(_ url: URL) async throws {
+        let text = try await Self.transcribe(url, engine: engine, baseURL: baseURL, model: model, apiKey: apiKey)
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { try keyboard.type(trimmed) }
+        finish()
     }
 
     func cancel() {

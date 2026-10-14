@@ -78,6 +78,7 @@ final class Agent {
     func status() -> AgentStatus {
         var status = SystemControl.status()
         status.switcherActive = keyboard.switcherActive
+        status.dictationReady = dictation.isConfigured
         return status
     }
 

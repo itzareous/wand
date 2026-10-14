@@ -48,6 +48,9 @@ public struct ClientMessage: Codable, Equatable, Sendable {
         case pressKey
         /// Drive the app switcher with `switcher`.
         case appSwitcher
+        /// Transcribe `audio` (recorded on the phone) with the computer's dictation engine and type the text.
+        /// The `ack` arrives after the text has been typed.
+        case dictate
     }
 
     public var type: Kind
@@ -61,11 +64,15 @@ public struct ClientMessage: Codable, Equatable, Sendable {
     public var text: String?
     public var key: SpecialKey?
     public var switcher: SwitcherAction?
+    /// Recorded speech for `dictate`, base64 in JSON.
+    public var audio: Data?
+    /// Container of `audio`, e.g. "m4a".
+    public var audioFormat: String?
 
     public init(type: Kind, id: String? = nil, protocolVersion: Int? = nil, deviceName: String? = nil,
                 pairingCode: String? = nil, token: String? = nil, action: RemoteAction? = nil,
                 shortcutId: String? = nil, text: String? = nil, key: SpecialKey? = nil,
-                switcher: SwitcherAction? = nil) {
+                switcher: SwitcherAction? = nil, audio: Data? = nil, audioFormat: String? = nil) {
         self.type = type
         self.id = id
         self.protocolVersion = protocolVersion
@@ -77,6 +84,8 @@ public struct ClientMessage: Codable, Equatable, Sendable {
         self.text = text
         self.key = key
         self.switcher = switcher
+        self.audio = audio
+        self.audioFormat = audioFormat
     }
 
     public static func hello(deviceName: String, token: String?, pairingCode: String?) -> ClientMessage {
@@ -102,6 +111,10 @@ public struct ClientMessage: Codable, Equatable, Sendable {
 
     public static func appSwitcher(_ action: SwitcherAction) -> ClientMessage {
         ClientMessage(type: .appSwitcher, id: UUID().uuidString, switcher: action)
+    }
+
+    public static func dictate(audio: Data, format: String = "m4a") -> ClientMessage {
+        ClientMessage(type: .dictate, id: UUID().uuidString, audio: audio, audioFormat: format)
     }
 }
 
@@ -184,13 +197,17 @@ public struct AgentStatus: Codable, Equatable, Sendable {
     public var muted: Bool?
     /// True while the app switcher is open (⌘ held by the agent).
     public var switcherActive: Bool?
+    /// True when the computer has a dictation engine set up, so `dictate` can work.
+    public var dictationReady: Bool?
 
-    public init(hostName: String, platform: Platform, volume: Int?, muted: Bool?, switcherActive: Bool? = nil) {
+    public init(hostName: String, platform: Platform, volume: Int?, muted: Bool?, switcherActive: Bool? = nil,
+                dictationReady: Bool? = nil) {
         self.hostName = hostName
         self.platform = platform
         self.volume = volume
         self.muted = muted
         self.switcherActive = switcherActive
+        self.dictationReady = dictationReady
     }
 }
 

@@ -51,6 +51,12 @@ Whenever the app in front on the computer changes, and once right after `welcome
   - The agent **always releases ⌘**: on choose/cancel, when the phone disconnects, and after 15 s idle.
   - `status.switcherActive` reports whether the switcher is open (pushed on every change).
 
+## Dictation from the phone
+`{"type":"dictate","id":"…","audio":"<base64>","audioFormat":"m4a"}`. The phone records and the computer transcribes with
+its own dictation engine (cloud or on-device, configured in the Wand window), then types the text into the app in front.
+The `ack` comes after typing, or with `ok:false` and a readable `error`. `status.dictationReady` tells the phone whether
+an engine is set up. Keep recordings short: the agent accepts messages up to 16 MB.
+
 ## Status
 Phone: `{"type":"statusRequest"}` · Agent:
 `{"type":"status","status":{"hostName":"Studio","platform":"macos","volume":40,"muted":false}}`.

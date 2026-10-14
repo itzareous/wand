@@ -74,6 +74,7 @@ struct TouchBarView: View {
     }
 
     @ViewBuilder private var systemButtons: some View {
+        HoldToTalkButton(client: client, compact: true)
         key("lock.fill", .lockScreen)
     }
 

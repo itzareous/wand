@@ -10,6 +10,7 @@ import RemoteKit
 //   remote-cli shortcut <id>          run a shortcut, e.g. browser.reload
 //   remote-cli type <text>            type text on the computer
 //   remote-cli key <name>             press up|down|left|right|return|escape|tab|delete|space
+//   remote-cli dictate <audio.m4a>    send audio; the computer transcribes and types it
 //   remote-cli switcher <action>...   open|next|previous|choose|cancel, several steps on one connection
 //   remote-cli <action>               e.g. media.playPause, volume.up (see docs/protocol.md)
 // Token file: ~/.touchbar-remote-cli-token
@@ -89,6 +90,11 @@ func run(on endpoint: NWEndpoint) {
                 } else if command == "shortcut" {
                     guard let id = arguments.dropFirst().first else { fail("usage: remote-cli shortcut <id>") }
                     send(.runShortcut(id), on: connection)
+                } else if command == "dictate" {
+                    guard let path = arguments.dropFirst().first, let audio = FileManager.default.contents(atPath: path) else {
+                        fail("usage: remote-cli dictate <audio.m4a>")
+                    }
+                    send(.dictate(audio: audio, format: (path as NSString).pathExtension), on: connection)
                 } else if command == "type" {
                     send(.typeText(arguments.dropFirst().joined(separator: " ")), on: connection)
                 } else if command == "key" {
@@ -126,7 +132,7 @@ func run(on endpoint: NWEndpoint) {
 
     connection.start(queue: .main)
     receive()
-    DispatchQueue.main.asyncAfter(deadline: .now() + 10) { fail("timed out") }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 60) { fail("timed out") }
 }
 
 browse { endpoints in
