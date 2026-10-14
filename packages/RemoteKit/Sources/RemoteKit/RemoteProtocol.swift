@@ -20,6 +20,18 @@ public enum RemoteAction: String, Codable, CaseIterable, Sendable {
     case lockScreen = "system.lock"
 }
 
+/// Keys the phone can press on the computer (outside of app shortcuts).
+public enum SpecialKey: String, Codable, CaseIterable, Sendable {
+    case up, down, left, right
+    case `return`, escape, tab, delete, space
+}
+
+/// Drives the ⌘Tab app switcher: `open` holds ⌘ and shows it, `next`/`previous` move,
+/// `choose` releases ⌘ on the selected app, `cancel` closes it without switching.
+public enum SwitcherAction: String, Codable, CaseIterable, Sendable {
+    case open, next, previous, choose, cancel
+}
+
 /// Phone → agent.
 public struct ClientMessage: Codable, Equatable, Sendable {
     public enum Kind: String, Codable, Sendable {
@@ -30,6 +42,12 @@ public struct ClientMessage: Codable, Equatable, Sendable {
         case statusRequest
         /// Run one of the shortcuts from the agent's latest `context` (by `shortcutId`).
         case runShortcut
+        /// Type `text` on the computer as if from a keyboard.
+        case typeText
+        /// Press `key` once.
+        case pressKey
+        /// Drive the app switcher with `switcher`.
+        case appSwitcher
     }
 
     public var type: Kind
@@ -40,10 +58,14 @@ public struct ClientMessage: Codable, Equatable, Sendable {
     public var token: String?
     public var action: RemoteAction?
     public var shortcutId: String?
+    public var text: String?
+    public var key: SpecialKey?
+    public var switcher: SwitcherAction?
 
     public init(type: Kind, id: String? = nil, protocolVersion: Int? = nil, deviceName: String? = nil,
                 pairingCode: String? = nil, token: String? = nil, action: RemoteAction? = nil,
-                shortcutId: String? = nil) {
+                shortcutId: String? = nil, text: String? = nil, key: SpecialKey? = nil,
+                switcher: SwitcherAction? = nil) {
         self.type = type
         self.id = id
         self.protocolVersion = protocolVersion
@@ -52,6 +74,9 @@ public struct ClientMessage: Codable, Equatable, Sendable {
         self.token = token
         self.action = action
         self.shortcutId = shortcutId
+        self.text = text
+        self.key = key
+        self.switcher = switcher
     }
 
     public static func hello(deviceName: String, token: String?, pairingCode: String?) -> ClientMessage {
@@ -65,6 +90,18 @@ public struct ClientMessage: Codable, Equatable, Sendable {
 
     public static func runShortcut(_ shortcutId: String) -> ClientMessage {
         ClientMessage(type: .runShortcut, id: UUID().uuidString, shortcutId: shortcutId)
+    }
+
+    public static func typeText(_ text: String) -> ClientMessage {
+        ClientMessage(type: .typeText, id: UUID().uuidString, text: text)
+    }
+
+    public static func pressKey(_ key: SpecialKey) -> ClientMessage {
+        ClientMessage(type: .pressKey, id: UUID().uuidString, key: key)
+    }
+
+    public static func appSwitcher(_ action: SwitcherAction) -> ClientMessage {
+        ClientMessage(type: .appSwitcher, id: UUID().uuidString, switcher: action)
     }
 }
 
@@ -145,12 +182,15 @@ public struct AgentStatus: Codable, Equatable, Sendable {
     /// 0–100, nil when the agent cannot read it.
     public var volume: Int?
     public var muted: Bool?
+    /// True while the app switcher is open (⌘ held by the agent).
+    public var switcherActive: Bool?
 
-    public init(hostName: String, platform: Platform, volume: Int?, muted: Bool?) {
+    public init(hostName: String, platform: Platform, volume: Int?, muted: Bool?, switcherActive: Bool? = nil) {
         self.hostName = hostName
         self.platform = platform
         self.volume = volume
         self.muted = muted
+        self.switcherActive = switcherActive
     }
 }
 

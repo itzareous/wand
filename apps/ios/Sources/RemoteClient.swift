@@ -69,6 +69,18 @@ final class RemoteClient {
         send(ClientMessage.runShortcut(shortcut.id))
     }
 
+    func type(_ text: String) {
+        send(ClientMessage.typeText(text))
+    }
+
+    func press(_ key: SpecialKey) {
+        send(ClientMessage.pressKey(key))
+    }
+
+    func switcher(_ action: SwitcherAction) {
+        send(ClientMessage.appSwitcher(action))
+    }
+
     private func handle(_ connectionState: NWConnection.State) {
         switch connectionState {
         case .ready:

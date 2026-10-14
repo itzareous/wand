@@ -42,6 +42,15 @@ Whenever the app in front on the computer changes, and once right after `welcome
   it replies `ok:false` instead of pressing keys in the wrong app.
 - Shortcut ids are `<set>.<action>`, and they are a contract: never rename one.
 
+## Keyboard and app switcher
+- `{"type":"typeText","id":"…","text":"hello"}` types text, any characters including emoji. `\n` presses Return.
+- `{"type":"pressKey","id":"…","key":"left"}`, where `key` is one of `up down left right return escape tab delete space`.
+- `{"type":"appSwitcher","id":"…","switcher":"open"}`, where `switcher` is one of `open next previous choose cancel`.
+  - `open` holds ⌘ and shows the ⌘Tab switcher.
+  - While it is open, `pressKey` left/right/tab move the selection, `return` chooses and `escape` cancels.
+  - The agent **always releases ⌘**: on choose/cancel, when the phone disconnects, and after 15 s idle.
+  - `status.switcherActive` reports whether the switcher is open (pushed on every change).
+
 ## Status
 Phone: `{"type":"statusRequest"}` · Agent:
 `{"type":"status","status":{"hostName":"Studio","platform":"macos","volume":40,"muted":false}}`.

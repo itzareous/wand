@@ -24,6 +24,7 @@ final class Agent {
 
     @ObservationIgnored private var server: AgentServer?
     @ObservationIgnored let frontmostApp = FrontmostApp()
+    @ObservationIgnored let keyboard = KeyboardControl()
 
     init() {
         pairedDevices = tokens.values.sorted()
@@ -36,7 +37,22 @@ final class Agent {
         frontmostApp.onChange = { [weak server] context in
             server?.broadcast(ServerMessage(type: .context, context: context))
         }
+        keyboard.onSwitcherChange = { [weak self, weak server] in
+            guard let self else { return }
+            server?.broadcast(ServerMessage(type: .status, status: self.status()))
+        }
         server.start()
+    }
+
+    func status() -> AgentStatus {
+        var status = SystemControl.status()
+        status.switcherActive = keyboard.switcherActive
+        return status
+    }
+
+    /// The phone went away: make sure nothing stays held down.
+    func sessionClosed() {
+        keyboard.releaseIfNeeded()
     }
 
     /// Runs a shortcut from the set for the app in front. Uses the context kept current by the activation

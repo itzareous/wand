@@ -40,3 +40,14 @@ import Testing
     let data = Data(#"{"id":"1","ok":true,"type":"ack"}"#.utf8)
     #expect(try RemoteCoding.decode(ServerMessage.self, from: data).ok == true)
 }
+
+@Test func keyboardWireFormats() throws {
+    func json(_ message: ClientMessage) throws -> String {
+        var message = message
+        message.id = "1"
+        return String(decoding: try RemoteCoding.encode(message), as: UTF8.self)
+    }
+    #expect(try json(.typeText("hi")) == #"{"id":"1","text":"hi","type":"typeText"}"#)
+    #expect(try json(.pressKey(.return)) == #"{"id":"1","key":"return","type":"pressKey"}"#)
+    #expect(try json(.appSwitcher(.next)) == #"{"id":"1","switcher":"next","type":"appSwitcher"}"#)
+}

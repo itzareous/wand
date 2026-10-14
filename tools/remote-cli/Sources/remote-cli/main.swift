@@ -8,6 +8,9 @@ import RemoteKit
 //   remote-cli status                 print the agent's status
 //   remote-cli context                print the app in front and its shortcut ids
 //   remote-cli shortcut <id>          run a shortcut, e.g. browser.reload
+//   remote-cli type <text>            type text on the computer
+//   remote-cli key <name>             press up|down|left|right|return|escape|tab|delete|space
+//   remote-cli switcher <action>...   open|next|previous|choose|cancel, several steps on one connection
 //   remote-cli <action>               e.g. media.playPause, volume.up (see docs/protocol.md)
 // Token file: ~/.touchbar-remote-cli-token
 
@@ -20,7 +23,7 @@ func fail(_ message: String) -> Never {
 }
 
 guard let command = arguments.first else {
-    fail("usage: remote-cli list | pair <code> | status | context | shortcut <id> | <action>\nactions: \(RemoteAction.allCases.map(\.rawValue).joined(separator: ", "))")
+    fail("usage: remote-cli list | pair <code> | status | context | shortcut <id> | type <text> | key <name> | switcher <action>... | <action>\nactions: \(RemoteAction.allCases.map(\.rawValue).joined(separator: ", "))")
 }
 
 func browse(timeout: TimeInterval = 4, _ done: @escaping ([NWEndpoint]) -> Void) {
@@ -39,6 +42,8 @@ func send(_ message: ClientMessage, on connection: NWConnection) {
     let context = NWConnection.ContentContext(identifier: "message", metadata: [NWProtocolWebSocket.Metadata(opcode: .text)])
     connection.send(content: data, contentContext: context, isComplete: true, completion: .idempotent)
 }
+
+var pendingAcks = 1
 
 func run(on endpoint: NWEndpoint) {
     let parameters = NWParameters.tcp
@@ -84,6 +89,21 @@ func run(on endpoint: NWEndpoint) {
                 } else if command == "shortcut" {
                     guard let id = arguments.dropFirst().first else { fail("usage: remote-cli shortcut <id>") }
                     send(.runShortcut(id), on: connection)
+                } else if command == "type" {
+                    send(.typeText(arguments.dropFirst().joined(separator: " ")), on: connection)
+                } else if command == "key" {
+                    guard let key = arguments.dropFirst().first.flatMap(SpecialKey.init(rawValue:)) else { fail("unknown key") }
+                    send(.pressKey(key), on: connection)
+                } else if command == "switcher" {
+                    let actions = arguments.dropFirst().compactMap(SwitcherAction.init(rawValue:))
+                    guard !actions.isEmpty else { fail("unknown switcher action") }
+                    pendingAcks = actions.count
+                    for (index, action) in actions.enumerated() {
+                        // Give the switcher time to draw between steps, like a person would.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.6) {
+                            send(.appSwitcher(action), on: connection)
+                        }
+                    }
                 } else if let action = RemoteAction(rawValue: command) {
                     send(.command(action), on: connection)
                 } else {
@@ -96,7 +116,9 @@ func run(on endpoint: NWEndpoint) {
             case .status, .context:
                 break
             case .ack:
-                if message.ok == true { exit(0) } else { fail("action failed") }
+                guard message.ok == true else { fail("action failed") }
+                pendingAcks -= 1
+                if pendingAcks <= 0 { exit(0) }
             }
             receive()
         }

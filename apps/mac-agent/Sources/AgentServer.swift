@@ -82,7 +82,9 @@ final class ClientSession {
             MainActor.assumeIsolated {
                 guard let self else { return }
                 switch state {
-                case .failed, .cancelled: self.onClose(self)
+                case .failed, .cancelled:
+                    self.agent.sessionClosed()
+                    self.onClose(self)
                 default: break
                 }
             }
@@ -114,7 +116,7 @@ final class ClientSession {
             }
             isAuthenticated = true
             send(ServerMessage(type: .welcome, token: result.newToken))
-            send(ServerMessage(type: .status, status: SystemControl.status()))
+            send(ServerMessage(type: .status, status: agent.status()))
             send(ServerMessage(type: .context, context: agent.frontmostApp.context))
             return
         }
@@ -132,7 +134,7 @@ final class ClientSession {
             } catch {
                 send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
             }
-            send(ServerMessage(type: .status, status: SystemControl.status()))
+            send(ServerMessage(type: .status, status: agent.status()))
         case .runShortcut:
             guard let shortcutId = message.shortcutId else {
                 return send(ServerMessage(type: .ack, id: message.id, ok: false, error: "Missing shortcutId"))
@@ -143,8 +145,23 @@ final class ClientSession {
             } catch {
                 send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
             }
+        case .typeText, .pressKey, .appSwitcher:
+            do {
+                switch message.type {
+                case .typeText: try agent.keyboard.type(message.text ?? "")
+                case .pressKey:
+                    guard let key = message.key else { throw SystemControlError.scriptFailed("Missing key") }
+                    try agent.keyboard.press(key)
+                default:
+                    guard let action = message.switcher else { throw SystemControlError.scriptFailed("Missing switcher action") }
+                    try agent.keyboard.switcher(action)
+                }
+                send(ServerMessage(type: .ack, id: message.id, ok: true))
+            } catch {
+                send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
+            }
         case .statusRequest:
-            send(ServerMessage(type: .status, status: SystemControl.status()))
+            send(ServerMessage(type: .status, status: agent.status()))
         case .hello:
             break
         }

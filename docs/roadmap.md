@@ -29,9 +29,17 @@
       really opens Downloads; a stale shortcut from another app is refused
 - [ ] A person tries the browser and Figma sets in the real apps
 
+## Slice 2: Keyboard and app switcher (branch `slice-2-keyboard`)
+- [x] Protocol: `typeText`, `pressKey`, `appSwitcher`, `status.switcherActive` (additive, tested)
+- [x] Agent: unicode typing, special keys, ⌘Tab switcher with guaranteed ⌘ release
+- [x] iPhone: Keyboard tab with a live-typing field (edits are mirrored as typing and deletes), switcher and arrow pad
+- [x] Verified (2026-10-14) on the Mac: typed `Hello from the phone ✓ é`, Return and Delete into TextEdit;
+      switcher open→cancel stays put, open→next→choose switches app, disconnect mid-switch releases ⌘
+- [ ] A person tries it from a real iPhone
+
 ## Next slices (in order)
 - **Screenshot** (next): full screen or front app → Mac clipboard + phone (share sheet). Needs Screen Recording.
-- **Trackpad and keyboard**: move/click/scroll and typing from the phone.
+- **Trackpad**: move, click and scroll from the phone (the keyboard part is done in slice 2).
 - **Now Playing**: Music and Spotify first; browser video only after research.
 1. **Keychain**: move tokens from UserDefaults to Keychain on both sides. Add a "Forget this computer" option on the phone.
 2. **Launch at login**: `SMAppService.mainApp` toggle in the agent menu.

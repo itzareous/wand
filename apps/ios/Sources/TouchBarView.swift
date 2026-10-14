@@ -6,31 +6,28 @@ import SwiftUI
 struct TouchBarView: View {
     let client: RemoteClient
     @State private var tapCount = 0
+    @State private var tab: Tab = DebugLaunch.tab.flatMap(Tab.init(rawValue:)) ?? .controls
+
+    enum Tab: String, CaseIterable, Identifiable {
+        case controls = "Controls"
+        case keyboard = "Keyboard"
+        var id: Self { self }
+    }
 
     var body: some View {
         GeometryReader { geometry in
             let isLandscape = geometry.size.width > geometry.size.height
             ScrollView {
                 VStack(spacing: 16) {
-                    if let context = client.context {
-                        AppShortcutsView(context: context, isCompact: isLandscape) { shortcut in
-                            tapCount += 1
-                            client.run(shortcut)
-                        }
+                    Picker("Mode", selection: $tab) {
+                        ForEach(Tab.allCases) { Text($0.rawValue).tag($0) }
                     }
-                    if isLandscape {
-                        HStack(spacing: 10) {
-                            mediaButtons
-                            divider
-                            volumeButtons
-                            divider
-                            systemButtons
-                        }
-                        .strip()
+                    .pickerStyle(.segmented)
+
+                    if tab == .keyboard {
+                        KeyboardPanel(client: client) { tapCount += 1 }
                     } else {
-                        HStack(spacing: 10) { mediaButtons }.strip()
-                        HStack(spacing: 10) { volumeButtons }.strip()
-                        HStack(spacing: 10) { systemButtons }.strip()
+                        controls(isLandscape: isLandscape)
                     }
                     statusLine
                 }
@@ -39,6 +36,29 @@ struct TouchBarView: View {
             }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: tapCount)
+    }
+
+    @ViewBuilder private func controls(isLandscape: Bool) -> some View {
+        if let context = client.context {
+            AppShortcutsView(context: context, isCompact: isLandscape) { shortcut in
+                tapCount += 1
+                client.run(shortcut)
+            }
+        }
+        if isLandscape {
+            HStack(spacing: 10) {
+                mediaButtons
+                divider
+                volumeButtons
+                divider
+                systemButtons
+            }
+            .strip()
+        } else {
+            HStack(spacing: 10) { mediaButtons }.strip()
+            HStack(spacing: 10) { volumeButtons }.strip()
+            HStack(spacing: 10) { systemButtons }.strip()
+        }
     }
 
     @ViewBuilder private var mediaButtons: some View {
