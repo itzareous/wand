@@ -53,6 +53,8 @@ targets:
         CFBundleDisplayName: Wand
         LSUIElement: true
         NSLocalNetworkUsageDescription: Wand lets your phone control this Mac over Wi-Fi.
+        NSMicrophoneUsageDescription: Wand listens while you hold the dictation key, then types what you said.
+        NSSpeechRecognitionUsageDescription: Wand can turn your dictation into text on this Mac, without sending audio anywhere.
         NSBonjourServices: [_wand._tcp]
     settings:
       base:

@@ -54,8 +54,11 @@ final class Agent {
     @ObservationIgnored private var server: AgentServer?
     @ObservationIgnored let frontmostApp = FrontmostApp()
     @ObservationIgnored let keyboard = KeyboardControl()
+    /// Hold-to-talk dictation into the app in front; independent of pairing.
+    @ObservationIgnored let dictation: DictationController
 
     init() {
+        dictation = DictationController(keyboard: keyboard)
         hasCompletedSetup = UserDefaults.standard.bool(forKey: Self.setupKey)
         pairedDevices = Self.devices(from: tokens)
         logPairingCode()

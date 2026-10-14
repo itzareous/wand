@@ -50,6 +50,14 @@
 - [ ] QR pairing confirmed from a real iPhone camera
 - [ ] App icon for both apps
 
+## Dictation (branch `dictation`)
+- [x] Hold Right ⌥ Option anywhere → record → transcribe → typed into the app in front; works with or without a paired phone
+- [x] Engines: Cloud (OpenAI, Groq, or any OpenAI-compatible URL; key stored in the Keychain) or On this Mac (Apple Speech)
+- [x] On-screen pill: listening level meter, transcribing, errors. Pressing another key while holding ⌥ cancels.
+- [x] Cloud request verified against a local mock of `/audio/transcriptions` (upload shape, errors, missing key)
+- [ ] A person dictates for real with each engine
+- Next: dictate from the phone (push-to-talk), optional LLM cleanup of the transcript, voice commands
+
 ## Next slices (in order)
 - **Screenshot** (next): full screen or front app → Mac clipboard + phone (share sheet). Needs Screen Recording.
 - **Trackpad**: move, click and scroll from the phone (the keyboard part is done in slice 2).

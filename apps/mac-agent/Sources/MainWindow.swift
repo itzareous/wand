@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import SwiftUI
 
 /// The one window Wand has: first-run setup, then the home screen.
@@ -244,6 +245,8 @@ private struct HomeView: View {
                 }
             }
 
+            DictationSection(dictation: agent.dictation)
+
             Section("General") {
                 Toggle("Open Wand when I log in", isOn: Binding(
                     get: { agent.opensAtLogin },
@@ -274,6 +277,69 @@ private struct HomeView: View {
         case 0: agent.isListening ? "Waiting for your iPhone" : "Starting…"
         case 1: "iPhone connected"
         default: "\(agent.connectedTokens.count) iPhones connected"
+        }
+    }
+}
+
+// MARK: - Dictation
+
+private struct DictationSection: View {
+    @Bindable var dictation: DictationController
+    @State private var apiKeyDraft = ""
+    @State private var micStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+
+    var body: some View {
+        Section {
+            Toggle(isOn: $dictation.isEnabled) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Dictation")
+                    Text("Hold \(DictationController.hotkeyName), speak, and let go. Wand types it into the app you're using.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if dictation.isEnabled {
+                Picker("Transcription", selection: $dictation.engine) {
+                    ForEach(DictationEngine.allCases) { Text($0.title).tag($0) }
+                }
+
+                if dictation.engine == .cloud {
+                    Picker("Provider", selection: $dictation.provider) {
+                        ForEach(CloudProvider.allCases) { Text($0.title).tag($0) }
+                    }
+                    if dictation.provider == .custom {
+                        TextField("API URL", text: $dictation.baseURL, prompt: Text("https://your-server/v1"))
+                    }
+                    TextField("Model", text: $dictation.model)
+                    SecureField("API key", text: $apiKeyDraft, prompt: Text("Stored in your Keychain"))
+                        .onChange(of: apiKeyDraft) { _, value in dictation.apiKey = value }
+                }
+
+                HStack {
+                    Label(micStatus == .authorized ? "Microphone allowed" : "Microphone not allowed yet",
+                          systemImage: micStatus == .authorized ? "checkmark.circle.fill" : "mic.slash")
+                        .foregroundStyle(micStatus == .authorized ? .green : .secondary)
+                    Spacer()
+                    if micStatus == .notDetermined {
+                        Button("Allow…") { dictation.requestMicrophone() }.buttonBorderShape(.capsule)
+                    } else if micStatus != .authorized {
+                        Button("Open Settings…") {
+                            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")!)
+                        }
+                        .buttonBorderShape(.capsule)
+                    }
+                }
+
+                if case .failed(let message) = dictation.phase {
+                    Text(message).font(.caption).foregroundStyle(.red)
+                }
+            }
+        }
+        .onAppear { apiKeyDraft = dictation.apiKey }
+        .onChange(of: dictation.provider) { _, _ in apiKeyDraft = dictation.apiKey }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            micStatus = AVCaptureDevice.authorizationStatus(for: .audio)
         }
     }
 }
