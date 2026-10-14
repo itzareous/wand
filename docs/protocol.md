@@ -31,6 +31,17 @@ Agent: `{"type":"ack","id":"<same uuid>","ok":true}` (or `"ok":false,"error":"�
 | `volume.toggleMute` | toggle output mute |
 | `system.lock` | lock the screen (mac: sleeps the display) |
 
+## App context and shortcuts
+Whenever the app in front on the computer changes, and once right after `welcome`, the agent pushes:
+`{"type":"context","context":{"bundleId":"com.apple.finder","appName":"Finder","icon":"<base64 PNG>","setName":"Finder","shortcuts":[{"id":"finder.back","title":"Back","symbol":"chevron.left"}, …]}}`
+
+- `symbol` is an SF Symbol name. `icon` is a small PNG (96 px), and may be absent.
+- The agent owns what each shortcut does. The phone only sends the id back:
+  `{"type":"runShortcut","id":"<uuid>","shortcutId":"finder.back"}` → `ack`.
+- The agent checks the id against the shortcut set of the app in front **now**. If the user switched apps in between,
+  it replies `ok:false` instead of pressing keys in the wrong app.
+- Shortcut ids are `<set>.<action>`, and they are a contract: never rename one.
+
 ## Status
 Phone: `{"type":"statusRequest"}` · Agent:
 `{"type":"status","status":{"hostName":"Studio","platform":"macos","volume":40,"muted":false}}`.

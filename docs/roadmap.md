@@ -18,7 +18,21 @@
 - [ ] Next and previous track confirmed by a person
 - [ ] Real iPhone on the same Wi-Fi (needs a signing team in `project.yml`)
 
+## Slice 1: App shortcuts (branch `slice-1-app-shortcuts`)
+- [x] Protocol: `context` push and `runShortcut` (additive, with tests)
+- [x] Agent: detects the frontmost app, keeps per-app shortcut sets (`ShortcutCatalog.swift`) and presses keys
+- [x] Sets: Browser (Chrome, Safari, Arc, Dia, Firefox, Brave, Edge, Opera, Vivaldi), Figma, Code editor (VS Code,
+      Cursor, Windsurf, Zed), Xcode, Terminal (Terminal, iTerm, Ghostty, Warp), Slack, Zoom, Teams, Finder, Mail,
+      Notion, Notes, Keynote, PowerPoint, Spotify, and General for everything else
+- [x] iPhone: app card with icon and shortcut grid (portrait), scrolling strip (landscape), updates live on app switch
+- [x] Verified (2026-10-14): Terminal → Finder switch updates the phone live (screenshots 05, 06); Finder "Downloads"
+      really opens Downloads; a stale shortcut from another app is refused
+- [ ] A person tries the browser and Figma sets in the real apps
+
 ## Next slices (in order)
+- **Screenshot** (next): full screen or front app → Mac clipboard + phone (share sheet). Needs Screen Recording.
+- **Trackpad and keyboard**: move/click/scroll and typing from the phone.
+- **Now Playing**: Music and Spotify first; browser video only after research.
 1. **Keychain**: move tokens from UserDefaults to Keychain on both sides. Add a "Forget this computer" option on the phone.
 2. **Launch at login**: `SMAppService.mainApp` toggle in the agent menu.
 3. **Now playing**: show the track title and artist on the phone (agent reads it; investigate the public options before any private API).

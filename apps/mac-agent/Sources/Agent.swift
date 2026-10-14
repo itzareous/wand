@@ -23,15 +23,30 @@ final class Agent {
     }
 
     @ObservationIgnored private var server: AgentServer?
+    @ObservationIgnored let frontmostApp = FrontmostApp()
 
     init() {
         pairedDevices = tokens.values.sorted()
         logPairingCode()
         // Ask on first launch so the agent shows up in the Accessibility list without hunting for the .app.
         if !hasAccessibility { SystemControl.requestAccessibility() }
+        ShortcutCatalog.validate()
         let server = AgentServer(agent: self)
         self.server = server
+        frontmostApp.onChange = { [weak server] context in
+            server?.broadcast(ServerMessage(type: .context, context: context))
+        }
         server.start()
+    }
+
+    /// Runs a shortcut from the set for the app in front. Uses the context kept current by the activation
+    /// notification; NSWorkspace.frontmostApplication goes stale in a background (LSUIElement) app. If the user switched apps since the phone
+    /// last got a context, the id won't be in the new set and this throws instead of pressing the wrong keys.
+    func runShortcut(id: String) throws {
+        guard let definition = ShortcutCatalog.definition(id: id, bundleId: frontmostApp.context.bundleId) else {
+            throw SystemControlError.shortcutUnavailable
+        }
+        try SystemControl.post(definition.combo)
     }
 
     func setListening(_ listening: Bool, error: String? = nil) {

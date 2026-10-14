@@ -6,6 +6,8 @@ import RemoteKit
 //   remote-cli list                   agents found on the network
 //   remote-cli pair <code>            pair with the first agent found, store the token
 //   remote-cli status                 print the agent's status
+//   remote-cli context                print the app in front and its shortcut ids
+//   remote-cli shortcut <id>          run a shortcut, e.g. browser.reload
 //   remote-cli <action>               e.g. media.playPause, volume.up (see docs/protocol.md)
 // Token file: ~/.touchbar-remote-cli-token
 
@@ -18,7 +20,7 @@ func fail(_ message: String) -> Never {
 }
 
 guard let command = arguments.first else {
-    fail("usage: remote-cli list | pair <code> | status | <action>\nactions: \(RemoteAction.allCases.map(\.rawValue).joined(separator: ", "))")
+    fail("usage: remote-cli list | pair <code> | status | context | shortcut <id> | <action>\nactions: \(RemoteAction.allCases.map(\.rawValue).joined(separator: ", "))")
 }
 
 func browse(timeout: TimeInterval = 4, _ done: @escaping ([NWEndpoint]) -> Void) {
@@ -62,6 +64,12 @@ func run(on endpoint: NWEndpoint) {
         connection.receiveMessage { data, _, _, error in
             if let error { fail("receive: \(error)") }
             guard let data, let message = try? RemoteCoding.decode(ServerMessage.self, from: data) else { return receive() }
+            if message.type == .context, let context = message.context {
+                print("< context: \(context.appName) [\(context.bundleId ?? "-")] set=\(context.setName) icon=\(context.icon?.count ?? 0)B")
+                context.shortcuts.forEach { print("    \($0.id)  \($0.title)") }
+                if command == "context" { exit(0) }
+                return receive()
+            }
             print("<", String(decoding: data, as: UTF8.self))
             switch message.type {
             case .welcome:
@@ -71,6 +79,11 @@ func run(on endpoint: NWEndpoint) {
                 }
                 if command == "status" || command == "pair" {
                     send(ClientMessage(type: .statusRequest), on: connection)
+                } else if command == "context" {
+                    break // the agent pushes it after welcome
+                } else if command == "shortcut" {
+                    guard let id = arguments.dropFirst().first else { fail("usage: remote-cli shortcut <id>") }
+                    send(.runShortcut(id), on: connection)
                 } else if let action = RemoteAction(rawValue: command) {
                     send(.command(action), on: connection)
                 } else {
@@ -80,7 +93,7 @@ func run(on endpoint: NWEndpoint) {
                 fail("rejected")
             case .status where command == "status" || command == "pair":
                 exit(0)
-            case .status:
+            case .status, .context:
                 break
             case .ack:
                 if message.ok == true { exit(0) } else { fail("action failed") }

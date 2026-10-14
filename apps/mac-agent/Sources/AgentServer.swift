@@ -47,6 +47,13 @@ final class AgentServer {
         }
     }
 
+    /// Sends to every paired phone that is connected.
+    func broadcast(_ message: ServerMessage) {
+        for session in sessions.values where session.isAuthenticated {
+            session.send(message)
+        }
+    }
+
     private func accept(_ connection: NWConnection) {
         guard let agent else { return connection.cancel() }
         let session = ClientSession(connection: connection, agent: agent) { [weak self] session in
@@ -62,7 +69,7 @@ final class ClientSession {
     private let connection: NWConnection
     private let agent: Agent
     private let onClose: (ClientSession) -> Void
-    private var isAuthenticated = false
+    private(set) var isAuthenticated = false
 
     init(connection: NWConnection, agent: Agent, onClose: @escaping (ClientSession) -> Void) {
         self.connection = connection
@@ -108,6 +115,7 @@ final class ClientSession {
             isAuthenticated = true
             send(ServerMessage(type: .welcome, token: result.newToken))
             send(ServerMessage(type: .status, status: SystemControl.status()))
+            send(ServerMessage(type: .context, context: agent.frontmostApp.context))
             return
         }
 
@@ -125,6 +133,16 @@ final class ClientSession {
                 send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
             }
             send(ServerMessage(type: .status, status: SystemControl.status()))
+        case .runShortcut:
+            guard let shortcutId = message.shortcutId else {
+                return send(ServerMessage(type: .ack, id: message.id, ok: false, error: "Missing shortcutId"))
+            }
+            do {
+                try agent.runShortcut(id: shortcutId)
+                send(ServerMessage(type: .ack, id: message.id, ok: true))
+            } catch {
+                send(ServerMessage(type: .ack, id: message.id, ok: false, error: error.localizedDescription))
+            }
         case .statusRequest:
             send(ServerMessage(type: .status, status: SystemControl.status()))
         case .hello:
@@ -132,7 +150,7 @@ final class ClientSession {
         }
     }
 
-    private func send(_ message: ServerMessage, thenClose: Bool = false) {
+    func send(_ message: ServerMessage, thenClose: Bool = false) {
         guard let data = try? RemoteCoding.encode(message) else { return }
         let metadata = NWProtocolWebSocket.Metadata(opcode: .text)
         let context = NWConnection.ContentContext(identifier: "message", metadata: [metadata])

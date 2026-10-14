@@ -21,6 +21,8 @@ final class RemoteClient {
     let agent: DiscoveredAgent
     private(set) var state: State = .idle
     private(set) var status: AgentStatus?
+    /// The app in front on the computer and its shortcuts; pushed by the agent on every app switch.
+    private(set) var context: AppContext?
     private(set) var lastError: String?
 
     @ObservationIgnored private var connection: NWConnection?
@@ -61,6 +63,10 @@ final class RemoteClient {
 
     func send(_ action: RemoteAction) {
         send(ClientMessage.command(action))
+    }
+
+    func run(_ shortcut: ShortcutButton) {
+        send(ClientMessage.runShortcut(shortcut.id))
     }
 
     private func handle(_ connectionState: NWConnection.State) {
@@ -109,6 +115,8 @@ final class RemoteClient {
             lastError = message.ok == false ? message.error : nil
         case .status:
             status = message.status
+        case .context:
+            context = message.context
         }
     }
 

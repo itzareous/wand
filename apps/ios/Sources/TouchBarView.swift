@@ -1,7 +1,8 @@
 import RemoteKit
 import SwiftUI
 
-/// The Touch Bar–style control strip. Landscape: one long strip. Portrait: grouped rows.
+/// The Touch Bar–style controls: shortcuts for the app in front, then media, volume and system.
+/// Landscape: compact strips. Portrait: a scrolling column.
 struct TouchBarView: View {
     let client: RemoteClient
     @State private var tapCount = 0
@@ -9,27 +10,33 @@ struct TouchBarView: View {
     var body: some View {
         GeometryReader { geometry in
             let isLandscape = geometry.size.width > geometry.size.height
-            VStack(spacing: 16) {
-                Spacer()
-                if isLandscape {
-                    HStack(spacing: 10) {
-                        mediaButtons
-                        divider
-                        volumeButtons
-                        divider
-                        systemButtons
+            ScrollView {
+                VStack(spacing: 16) {
+                    if let context = client.context {
+                        AppShortcutsView(context: context, isCompact: isLandscape) { shortcut in
+                            tapCount += 1
+                            client.run(shortcut)
+                        }
                     }
-                    .strip()
-                } else {
-                    HStack(spacing: 10) { mediaButtons }.strip()
-                    HStack(spacing: 10) { volumeButtons }.strip()
-                    HStack(spacing: 10) { systemButtons }.strip()
+                    if isLandscape {
+                        HStack(spacing: 10) {
+                            mediaButtons
+                            divider
+                            volumeButtons
+                            divider
+                            systemButtons
+                        }
+                        .strip()
+                    } else {
+                        HStack(spacing: 10) { mediaButtons }.strip()
+                        HStack(spacing: 10) { volumeButtons }.strip()
+                        HStack(spacing: 10) { systemButtons }.strip()
+                    }
+                    statusLine
                 }
-                statusLine
-                Spacer()
+                .padding(16)
+                .frame(maxWidth: .infinity, minHeight: geometry.size.height, alignment: .top)
             }
-            .padding(16)
-            .frame(maxWidth: .infinity)
         }
         .sensoryFeedback(.impact(weight: .light), trigger: tapCount)
     }

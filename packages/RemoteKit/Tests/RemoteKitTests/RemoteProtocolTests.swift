@@ -19,3 +19,24 @@ import Testing
     let name = RemoteProtocol.bonjourType.dropFirst().split(separator: ".").first!
     #expect(name.count <= 15)
 }
+
+@Test func runShortcutWireFormat() throws {
+    var message = ClientMessage.runShortcut("browser.back")
+    message.id = "1"
+    let json = String(decoding: try RemoteCoding.encode(message), as: UTF8.self)
+    #expect(json == #"{"id":"1","shortcutId":"browser.back","type":"runShortcut"}"#)
+}
+
+@Test func contextRoundTrip() throws {
+    let context = AppContext(bundleId: "com.figma.Desktop", appName: "Figma", icon: Data([1, 2, 3]), setName: "Figma",
+                             shortcuts: [ShortcutButton(id: "figma.zoomFit", title: "Zoom to fit", symbol: "arrow.up.left.and.arrow.down.right")])
+    let message = ServerMessage(type: .context, context: context)
+    let decoded = try RemoteCoding.decode(ServerMessage.self, from: RemoteCoding.encode(message))
+    #expect(decoded == message)
+}
+
+@Test func oldMessagesStillDecode() throws {
+    // A v1 agent's command ack has no context/shortcut fields.
+    let data = Data(#"{"id":"1","ok":true,"type":"ack"}"#.utf8)
+    #expect(try RemoteCoding.decode(ServerMessage.self, from: data).ok == true)
+}

@@ -1,14 +1,17 @@
 import AppKit
 import ApplicationServices
+import Carbon.HIToolbox
 import RemoteKit
 
 enum SystemControlError: LocalizedError {
     case needsAccessibility
+    case shortcutUnavailable
     case scriptFailed(String)
 
     var errorDescription: String? {
         switch self {
         case .needsAccessibility: "Allow the Remote agent in System Settings → Privacy & Security → Accessibility."
+        case .shortcutUnavailable: "That shortcut isn't available for the app in front any more."
         case .scriptFailed(let message): message
         }
     }
@@ -59,6 +62,22 @@ enum SystemControl {
             volume: volume.flatMap { Int($0) },
             muted: muted.map { $0 == "true" }
         )
+    }
+
+    /// Presses a key combo in whichever app is in front.
+    static func post(_ combo: KeyCombo) throws {
+        guard hasAccessibility else { throw SystemControlError.needsAccessibility }
+        let source = CGEventSource(stateID: .hidSystemState)
+        var flags = combo.flags
+        // Arrow keys carry these flags on a real keyboard; system hotkeys like ⌃↑ (Mission Control) match on them.
+        if [kVK_LeftArrow, kVK_RightArrow, kVK_UpArrow, kVK_DownArrow].contains(Int(combo.key)) {
+            flags.formUnion([.maskSecondaryFn, .maskNumericPad])
+        }
+        for isDown in [true, false] {
+            let event = CGEvent(keyboardEventSource: source, virtualKey: combo.key, keyDown: isDown)
+            event?.flags = flags
+            event?.post(tap: .cghidEventTap)
+        }
     }
 
     private static func postMediaKey(_ key: Int32) throws {

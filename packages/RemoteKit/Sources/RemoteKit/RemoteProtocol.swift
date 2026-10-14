@@ -28,6 +28,8 @@ public struct ClientMessage: Codable, Equatable, Sendable {
         case hello
         case command
         case statusRequest
+        /// Run one of the shortcuts from the agent's latest `context` (by `shortcutId`).
+        case runShortcut
     }
 
     public var type: Kind
@@ -37,9 +39,11 @@ public struct ClientMessage: Codable, Equatable, Sendable {
     public var pairingCode: String?
     public var token: String?
     public var action: RemoteAction?
+    public var shortcutId: String?
 
     public init(type: Kind, id: String? = nil, protocolVersion: Int? = nil, deviceName: String? = nil,
-                pairingCode: String? = nil, token: String? = nil, action: RemoteAction? = nil) {
+                pairingCode: String? = nil, token: String? = nil, action: RemoteAction? = nil,
+                shortcutId: String? = nil) {
         self.type = type
         self.id = id
         self.protocolVersion = protocolVersion
@@ -47,6 +51,7 @@ public struct ClientMessage: Codable, Equatable, Sendable {
         self.pairingCode = pairingCode
         self.token = token
         self.action = action
+        self.shortcutId = shortcutId
     }
 
     public static func hello(deviceName: String, token: String?, pairingCode: String?) -> ClientMessage {
@@ -56,6 +61,10 @@ public struct ClientMessage: Codable, Equatable, Sendable {
 
     public static func command(_ action: RemoteAction) -> ClientMessage {
         ClientMessage(type: .command, id: UUID().uuidString, action: action)
+    }
+
+    public static func runShortcut(_ shortcutId: String) -> ClientMessage {
+        ClientMessage(type: .runShortcut, id: UUID().uuidString, shortcutId: shortcutId)
     }
 }
 
@@ -70,6 +79,8 @@ public struct ServerMessage: Codable, Equatable, Sendable {
         case ack
         /// Pushed after commands and on `statusRequest`.
         case status
+        /// Pushed after `welcome` and whenever the frontmost app on the computer changes.
+        case context
     }
 
     public var type: Kind
@@ -78,15 +89,51 @@ public struct ServerMessage: Codable, Equatable, Sendable {
     public var ok: Bool?
     public var error: String?
     public var status: AgentStatus?
+    public var context: AppContext?
 
     public init(type: Kind, id: String? = nil, token: String? = nil, ok: Bool? = nil,
-                error: String? = nil, status: AgentStatus? = nil) {
+                error: String? = nil, status: AgentStatus? = nil, context: AppContext? = nil) {
         self.type = type
         self.id = id
         self.token = token
         self.ok = ok
         self.error = error
         self.status = status
+        self.context = context
+    }
+}
+
+/// The app in front on the computer and the shortcut buttons the agent offers for it.
+public struct AppContext: Codable, Equatable, Sendable {
+    public var bundleId: String?
+    public var appName: String
+    /// Small PNG of the app icon.
+    public var icon: Data?
+    /// Which shortcut set applies, e.g. "Browser", "Figma", "General".
+    public var setName: String
+    public var shortcuts: [ShortcutButton]
+
+    public init(bundleId: String?, appName: String, icon: Data?, setName: String, shortcuts: [ShortcutButton]) {
+        self.bundleId = bundleId
+        self.appName = appName
+        self.icon = icon
+        self.setName = setName
+        self.shortcuts = shortcuts
+    }
+}
+
+/// One button in an AppContext. The agent owns what it does; the phone only sends `id` back.
+public struct ShortcutButton: Codable, Equatable, Hashable, Identifiable, Sendable {
+    /// Namespaced, stable id, e.g. "browser.back".
+    public var id: String
+    public var title: String
+    /// SF Symbol name.
+    public var symbol: String
+
+    public init(id: String, title: String, symbol: String) {
+        self.id = id
+        self.title = title
+        self.symbol = symbol
     }
 }
 
