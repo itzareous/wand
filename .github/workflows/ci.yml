@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use the newest Xcode on the runner
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Protocol tests (RemoteKit)
+        working-directory: packages/RemoteKit
+        run: swift test
+
+      - name: Build remote-cli
+        working-directory: tools/remote-cli
+        run: swift build
+
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build Mac app
+        run: >
+          xcodebuild -project Wand.xcodeproj -scheme WandMac -configuration Debug
+          -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO build
+
+      - name: Build iPhone app
+        run: >
+          xcodebuild -project Wand.xcodeproj -scheme Wand -configuration Debug
+          -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
