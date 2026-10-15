@@ -28,6 +28,8 @@ targets:
       path: apps/ios/Info.plist
       properties:
         CFBundleDisplayName: Wand
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
         CFBundleURLTypes:
           - CFBundleURLName: $(PRODUCT_BUNDLE_IDENTIFIER)
@@ -53,6 +55,8 @@ targets:
       path: apps/mac-agent/Info.plist
       properties:
         CFBundleDisplayName: Wand
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSUIElement: true
         NSLocalNetworkUsageDescription: Wand lets your phone control this Mac over Wi-Fi.
         NSMicrophoneUsageDescription: Wand listens while you hold the dictation key, then types what you said.

@@ -11,7 +11,7 @@ struct MacAgentApp: App {
             MainWindow(agent: agent, launchedAtLogin: appDelegate.launchedAtLogin)
                 .onAppear { appDelegate.agent = agent }
         }
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         .windowStyle(.hiddenTitleBar)
 
         MenuBarExtra("Wand", image: "MenuBarIcon") {

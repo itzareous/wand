@@ -38,6 +38,9 @@ final class DictationController {
     static let hotkeyCode: UInt16 = 61
     static let hotkeyName = "Right ⌥ Option"
 
+    /// Word and dictation counts for the dashboard (never the text itself).
+    let stats = DictationStats()
+
     @ObservationIgnored private let keyboard: KeyboardControl
     @ObservationIgnored private let recorder = AudioRecorder()
     @ObservationIgnored private lazy var hud = DictationHUD(controller: self)
@@ -173,7 +176,10 @@ final class DictationController {
     private func transcribeAndType(_ url: URL) async throws {
         let text = try await Self.transcribe(url, engine: engine, baseURL: baseURL, model: model, apiKey: apiKey)
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty { try keyboard.type(trimmed) }
+        if !trimmed.isEmpty {
+            try keyboard.type(trimmed)
+            stats.record(trimmed)
+        }
         finish()
     }
 
