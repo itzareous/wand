@@ -17,7 +17,9 @@ final class DictationController {
     /// Live microphone level while recording, 0…1.
     private(set) var level: Float = 0
 
-    var isEnabled: Bool { didSet { save(isEnabled, Keys.enabled); updateMonitors() } }
+    var isEnabled: Bool { didSet { save(isEnabled, Keys.enabled); onEnabledChange?() } }
+    /// Lets the shared right-Option key know whether dictation still needs it.
+    @ObservationIgnored var onEnabledChange: (() -> Void)?
     var engine: DictationEngine { didSet { save(engine.rawValue, Keys.engine) } }
     var provider: CloudProvider {
         didSet {
@@ -34,9 +36,9 @@ final class DictationController {
         set { Keychain.set(newValue.trimmingCharacters(in: .whitespacesAndNewlines), for: provider.keychainAccount) }
     }
 
-    /// Right Option. Rarely used on its own, and holding it alone does nothing in other apps.
-    static let hotkeyCode: UInt16 = 61
-    static let hotkeyName = "Right ⌥ Option"
+    /// Right Option (see RightOptionKey). Rarely used on its own, and holding it alone does nothing in other apps.
+    static let hotkeyCode = RightOptionKey.keyCode
+    static let hotkeyName = RightOptionKey.name
 
     /// Word and dictation counts for the dashboard (never the text itself).
     let stats = DictationStats()
@@ -44,7 +46,6 @@ final class DictationController {
     @ObservationIgnored private let keyboard: KeyboardControl
     @ObservationIgnored private let recorder = AudioRecorder()
     @ObservationIgnored private lazy var hud = DictationHUD(controller: self)
-    @ObservationIgnored private var monitors: [Any] = []
     @ObservationIgnored private var startedAt: Date?
     @ObservationIgnored private var hideTask: Task<Void, Never>?
 
@@ -66,7 +67,6 @@ final class DictationController {
         baseURL = defaults.string(forKey: Keys.baseURL) ?? provider.defaultBaseURL
         model = defaults.string(forKey: Keys.model) ?? provider.defaultModel
         recorder.onLevel = { [weak self] level in self?.level = level }
-        updateMonitors()
     }
 
     /// An engine is usable: on-device needs nothing; cloud needs a key.
@@ -101,34 +101,6 @@ final class DictationController {
         AVCaptureDevice.requestAccess(for: .audio) { _ in }
     }
 
-    // MARK: Hotkey
-
-    private func updateMonitors() {
-        monitors.forEach(NSEvent.removeMonitor)
-        monitors = []
-        guard isEnabled else { return }
-        // Global monitors see other apps' events (needs the Accessibility permission Wand already has);
-        // local ones cover Wand's own windows.
-        if let monitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown], handler: { [weak self] event in
-            MainActor.assumeIsolated { self?.handle(event) }
-        }) { monitors.append(monitor) }
-        if let monitor = NSEvent.addLocalMonitorForEvents(matching: [.flagsChanged, .keyDown], handler: { [weak self] event in
-            MainActor.assumeIsolated { self?.handle(event) }
-            return event
-        }) { monitors.append(monitor) }
-    }
-
-    private func handle(_ event: NSEvent) {
-        switch event.type {
-        case .flagsChanged where event.keyCode == Self.hotkeyCode:
-            if event.modifierFlags.contains(.option) { start() } else { stop() }
-        case .keyDown where phase == .recording:
-            cancel() // Option was used as a modifier (⌥-shortcut or special character), not to dictate
-        default:
-            break
-        }
-    }
-
     // MARK: Recording
 
     func start() {
@@ -157,7 +129,7 @@ final class DictationController {
     func stop() {
         guard phase == .recording, let url = recorder.stop() else { return }
         let duration = Date().timeIntervalSince(startedAt ?? Date())
-        guard duration > 0.35 else { // a tap, not a dictation
+        guard duration > 0.2 else { // too short to be speech
             try? FileManager.default.removeItem(at: url)
             return finish()
         }

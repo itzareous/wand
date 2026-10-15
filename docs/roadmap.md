@@ -61,6 +61,16 @@
 - [ ] A person tries hold-to-talk on a real iPhone
 - Next: optional LLM cleanup of the transcript, voice commands
 
+## Clipboard history (branch `clipboard-history`)
+- [x] Right ⌥ is shared: hold to dictate (starts after 180 ms, so taps don't flash the pill), double-tap for clipboard
+- [x] Text clipboard history saved in ~/Library/Application Support/Wand (100 items, data protection), skipping
+      concealed and transient pasteboard types
+- [x] Drop-down panel: search, ↑/↓, Return pastes into the app in front (the panel never activates Wand), Esc, ⌘1–9
+- [x] Dashboard Clipboard page (on/off, list, copy, remove, clear) and a Home card; off by default for new users
+- [x] Verified (2026-10-15): copies captured with the source app; a concealed item was not stored
+- [ ] A person double-taps right ⌥ and pastes from the drop-down
+- Later: images and files, and clipboard history on the iPhone
+
 ## Next slices (in order)
 - **Screenshot** (next): full screen or front app → Mac clipboard + phone (share sheet). Needs Screen Recording.
 - **Trackpad**: move, click and scroll from the phone (the keyboard part is done in slice 2).

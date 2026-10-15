@@ -56,6 +56,11 @@ final class Agent {
     @ObservationIgnored let keyboard = KeyboardControl()
     /// Hold-to-talk dictation into the app in front; independent of pairing.
     @ObservationIgnored let dictation: DictationController
+    /// Text copied on this Mac, opened with a double-tap of right ⌥.
+    @ObservationIgnored let clipboard = ClipboardHistory()
+    @ObservationIgnored private(set) lazy var clipboardPanel = ClipboardPanel(history: clipboard)
+    /// Right ⌥: hold to dictate, double-tap for clipboard history.
+    @ObservationIgnored let rightOption = RightOptionKey()
 
     init() {
         dictation = DictationController(keyboard: keyboard)
@@ -63,6 +68,7 @@ final class Agent {
         pairedDevices = Self.devices(from: tokens)
         logPairingCode()
         ShortcutCatalog.validate()
+        wireRightOption()
         let server = AgentServer(agent: self, serviceName: serviceName)
         self.server = server
         frontmostApp.onChange = { [weak server] context in
@@ -73,6 +79,28 @@ final class Agent {
             server?.broadcast(ServerMessage(type: .status, status: self.status()))
         }
         server.start()
+    }
+
+    private func wireRightOption() {
+        rightOption.onHoldStart = { [weak self] in
+            guard let self, self.dictation.isEnabled else { return }
+            if self.clipboardPanel.isVisible { self.clipboardPanel.hide() }
+            self.dictation.start()
+        }
+        rightOption.onHoldEnd = { [weak self] in self?.dictation.stop() }
+        rightOption.onCancel = { [weak self] in self?.dictation.cancel() }
+        rightOption.onDoubleTap = { [weak self] in
+            guard let self, self.clipboard.isEnabled else { return }
+            self.clipboardPanel.toggle()
+        }
+        let update = { [weak self] in
+            guard let self else { return }
+            self.rightOption.isActive = self.dictation.isEnabled || self.clipboard.isEnabled
+        }
+        dictation.onEnabledChange = update
+        clipboard.onEnabledChange = update
+        clipboard.currentAppName = { [weak self] in self?.frontmostApp.context.appName }
+        update()
     }
 
     func status() -> AgentStatus {

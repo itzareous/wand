@@ -11,13 +11,14 @@ struct DashboardView: View {
     @State private var page: Page
 
     enum Page: String, CaseIterable, Identifiable {
-        case home, iPhone, dictation, shortcuts, settings
+        case home, iPhone, dictation, clipboard, shortcuts, settings
         var id: Self { self }
         var title: String {
             switch self {
             case .home: "Home"
             case .iPhone: "iPhone"
             case .dictation: "Dictation"
+            case .clipboard: "Clipboard"
             case .shortcuts: "Shortcuts"
             case .settings: "Settings"
             }
@@ -27,6 +28,7 @@ struct DashboardView: View {
             case .home: "house"
             case .iPhone: "iphone"
             case .dictation: "mic"
+            case .clipboard: "doc.on.clipboard"
             case .shortcuts: "square.grid.2x2"
             case .settings: "gearshape"
             }
@@ -36,6 +38,7 @@ struct DashboardView: View {
             case .home: "house.fill"
             case .iPhone: "iphone" // there is no filled iPhone symbol
             case .dictation: "mic.fill"
+            case .clipboard: "doc.on.clipboard.fill"
             case .shortcuts: "square.grid.2x2.fill"
             case .settings: "gearshape.fill"
             }
@@ -70,6 +73,7 @@ struct DashboardView: View {
             case .home: HomePage(agent: agent, go: { page = $0 })
             case .iPhone: IPhonePage(agent: agent)
             case .dictation: DictationPage(dictation: agent.dictation)
+            case .clipboard: ClipboardPage(history: agent.clipboard, openPanel: { agent.clipboardPanel.show() })
             case .shortcuts: ShortcutsPage(currentBundleId: agent.frontmostApp.context.bundleId)
             case .settings: SettingsPage(agent: agent)
             }
@@ -237,6 +241,7 @@ private struct HomePage: View {
                     }
                     Text("iPhone").font(.system(size: 16, weight: .semibold)).padding(.top, 14)
                     Text(iPhoneStatus).font(.system(size: 13)).foregroundStyle(.secondary).padding(.top, 2)
+                        .fixedSize(horizontal: false, vertical: true)
                     PillButton(title: agent.pairedDevices.isEmpty ? "Pair your iPhone" : "Manage") { go(.iPhone) }
                         .padding(.top, 16)
                 }
@@ -247,11 +252,28 @@ private struct HomePage: View {
                         Dot(on: dictation.isEnabled)
                     }
                     Text("Dictation").font(.system(size: 16, weight: .semibold)).padding(.top, 14)
-                    Text(dictation.isEnabled ? "Hold right ⌥ option to talk · \(dictation.engine == .cloud ? "Cloud" : "On this Mac")" : "Off")
+                    Text(dictation.isEnabled ? "Hold right ⌥ to talk" : "Off")
                         .font(.system(size: 13)).foregroundStyle(.secondary).padding(.top, 2)
+                        .fixedSize(horizontal: false, vertical: true)
                     PillButton(title: dictation.isEnabled ? "Settings" : "Turn on") {
                         if !dictation.isEnabled { dictation.isEnabled = true }
                         go(.dictation)
+                    }
+                    .padding(.top, 16)
+                }
+                Card {
+                    HStack {
+                        Image(systemName: "doc.on.clipboard").font(.title3).frame(height: 22)
+                        Spacer()
+                        Dot(on: agent.clipboard.isEnabled)
+                    }
+                    Text("Clipboard").font(.system(size: 16, weight: .semibold)).padding(.top, 14)
+                    Text(agent.clipboard.isEnabled ? "Double-tap right ⌥" : "Off")
+                        .font(.system(size: 13)).foregroundStyle(.secondary).padding(.top, 2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    PillButton(title: agent.clipboard.isEnabled ? "Open" : "Turn on") {
+                        if !agent.clipboard.isEnabled { agent.clipboard.isEnabled = true }
+                        go(.clipboard)
                     }
                     .padding(.top, 16)
                 }
@@ -297,8 +319,8 @@ private struct HomePage: View {
 
     private var iPhoneStatus: String {
         if !agent.connectedTokens.isEmpty { return "Connected" }
-        if agent.pairedDevices.isEmpty { return "No iPhone paired yet" }
-        return "Paired · not connected right now"
+        if agent.pairedDevices.isEmpty { return "Not paired yet" }
+        return "Not connected"
     }
 }
 
@@ -529,6 +551,75 @@ private struct EngineCard: View {
         }
         .buttonStyle(.plain)
         .animation(.snappy(duration: 0.2), value: selected)
+    }
+}
+
+// MARK: - Clipboard
+
+private struct ClipboardPage: View {
+    @Bindable var history: ClipboardHistory
+    let openPanel: () -> Void
+    @State private var confirmClear = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            PageTitle(title: "Clipboard", subtitle: "Everything you copy, one double-tap away.")
+
+            Card {
+                Toggle(isOn: $history.isEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Clipboard history").font(.system(size: 14, weight: .medium))
+                        Text("Double-tap the right ⌥ option key anywhere to open it, then pick something to paste.")
+                            .font(.system(size: 12.5)).foregroundStyle(.secondary)
+                    }
+                }
+                .toggleStyle(.switch)
+            }
+            Text("Saved only on this Mac and never sent anywhere. Wand skips passwords that password managers mark as private.")
+                .font(.system(size: 12)).foregroundStyle(.tertiary).padding(.top, 10)
+
+            HStack {
+                Text("Recent").font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
+                Spacer()
+                if !history.items.isEmpty {
+                    PillButton(title: "Open drop-down", action: openPanel)
+                    PillButton(title: "Clear history", role: .destructive) { confirmClear = true }
+                }
+            }
+            .padding(.top, 28).padding(.bottom, 10)
+
+            Card(padding: 0) {
+                if history.items.isEmpty {
+                    Text(history.isEnabled ? "Copy some text and it shows up here." : "Turn on clipboard history to start saving what you copy.")
+                        .font(.system(size: 13)).foregroundStyle(.secondary).padding(20)
+                }
+                ForEach(Array(history.items.prefix(30).enumerated()), id: \.element.id) { index, item in
+                    if index > 0 { Divider().padding(.leading, 20) }
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.text.trimmingCharacters(in: .whitespacesAndNewlines))
+                                .font(.system(size: 13.5)).lineLimit(2)
+                            HStack(spacing: 6) {
+                                Text(item.date, format: .relative(presentation: .named))
+                                if let app = item.appName { Text("· \(app)") }
+                            }
+                            .font(.system(size: 11.5)).foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 8)
+                        Button { history.copyToPasteboard(item) } label: { Image(systemName: "doc.on.doc") }
+                            .buttonStyle(.plain).foregroundStyle(.secondary).help("Copy")
+                        Button { history.remove(item) } label: { Image(systemName: "xmark") }
+                            .buttonStyle(.plain).foregroundStyle(.secondary).help("Remove")
+                    }
+                    .padding(.horizontal, 20).padding(.vertical, 12)
+                }
+            }
+        }
+        .confirmationDialog("Clear clipboard history?", isPresented: $confirmClear) {
+            Button("Clear history", role: .destructive) { history.clear() }
+        } message: {
+            Text("This removes everything Wand has saved. Your current clipboard isn't changed.")
+        }
     }
 }
 

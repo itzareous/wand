@@ -21,6 +21,10 @@ volume, and tap shortcuts for whatever app you're using, from across the room.
 - **Remote keyboard**: type on your Mac from your phone in any language, emoji included. It also has arrow keys, Return, Esc, Tab and Delete.
 - **App switcher**: open the ⌘Tab switcher, pick an app with ← →, and choose it.
 - **Lock screen** from across the room.
+- **Dictation**: hold right ⌥ on your Mac (or Hold to talk on your iPhone), speak, and Wand types it into any app.
+  Cloud (OpenAI, Groq or any OpenAI-compatible server, your key) or on-device.
+- **Clipboard history**: double-tap right ⌥ for a drop-down of everything you've copied. Search it, then press Return to paste.
+  It's stored only on your Mac and skips passwords that password managers mark as private.
 - **Pair with a QR code**: scan the code on your Mac with the iPhone camera and you're done.
 - **Private by design**: the phone talks directly to your Mac over your local Wi-Fi. There's no account and no cloud.
 
