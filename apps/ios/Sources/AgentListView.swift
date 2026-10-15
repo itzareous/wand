@@ -23,11 +23,14 @@ struct AgentListView: View {
         NavigationStack(path: $path) {
             List {
                 if discovery.agents.isEmpty {
-                    ContentUnavailableView(
-                        "Looking for computers",
-                        systemImage: "desktopcomputer",
-                        description: Text(discovery.error ?? "Open Wand on your Mac or PC. Both devices need to be on the same Wi-Fi.")
-                    )
+                    ContentUnavailableView {
+                        VStack(spacing: 16) {
+                            Image("Mascot").resizable().scaledToFit().frame(width: 72)
+                            Text("Looking for computers")
+                        }
+                    } description: {
+                        Text(discovery.error ?? "Open Wand on your Mac or PC. Both devices need to be on the same Wi-Fi.")
+                    }
                 }
                 ForEach(discovery.agents) { agent in
                     NavigationLink(value: agent) {

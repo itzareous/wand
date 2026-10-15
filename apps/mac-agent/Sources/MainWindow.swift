@@ -346,17 +346,16 @@ private struct DictationSection: View {
 
 // MARK: - Pieces
 
-private struct WandMark: View {
+/// The Wand app icon (blue tile with the mascot).
+struct WandMark: View {
     let size: CGFloat
 
     var body: some View {
-        Image(systemName: "wand.and.sparkles")
-            .font(.system(size: size * 0.5, weight: .medium))
-            .foregroundStyle(.white)
+        Image(nsImage: NSApp.applicationIconImage)
+            .resizable()
+            .interpolation(.high)
+            .frame(width: size * 1.24, height: size * 1.24) // the icon file has a transparent margin
             .frame(width: size, height: size)
-            .background(RoundedRectangle(cornerRadius: size * 0.26, style: .continuous)
-                .fill(LinearGradient(colors: [Color(red: 0.42, green: 0.32, blue: 0.98), Color(red: 0.16, green: 0.10, blue: 0.45)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing)))
     }
 }
 

@@ -14,7 +14,7 @@ struct MacAgentApp: App {
         .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
 
-        MenuBarExtra("Wand", systemImage: "wand.and.sparkles") {
+        MenuBarExtra("Wand", image: "MenuBarIcon") {
             AgentMenu(agent: agent)
         }
         .menuBarExtraStyle(.window)

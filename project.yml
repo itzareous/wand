@@ -12,6 +12,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.0"
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     CURRENT_PROJECT_VERSION: "1"
 packages:
   RemoteKit:
@@ -20,7 +21,7 @@ targets:
   Wand:
     type: application
     platform: iOS
-    sources: [apps/ios/Sources]
+    sources: [apps/ios/Sources, apps/ios/Resources]
     dependencies:
       - package: RemoteKit
     info:
@@ -45,7 +46,7 @@ targets:
   WandMac:
     type: application
     platform: macOS
-    sources: [apps/mac-agent/Sources]
+    sources: [apps/mac-agent/Sources, apps/mac-agent/Resources]
     dependencies:
       - package: RemoteKit
     info:
