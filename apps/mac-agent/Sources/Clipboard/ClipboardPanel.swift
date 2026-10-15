@@ -17,7 +17,7 @@ final class ClipboardPanel {
 
     init(history: ClipboardHistory) {
         self.history = history
-        panel = KeyPanel(contentRect: NSRect(x: 0, y: 0, width: 560, height: 420),
+        panel = KeyPanel(contentRect: NSRect(x: 0, y: 0, width: 480, height: 360),
                          styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: true)
         panel.isFloatingPanel = true
         panel.level = .popUpMenu
@@ -40,19 +40,27 @@ final class ClipboardPanel {
     func show() {
         let view = ClipboardListView(history: history, onPick: { [weak self] in self?.paste($0) }, onClose: { [weak self] in self?.hide() })
         panel.contentView = NSHostingView(rootView: view)
-        let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
-        if let visible = screen?.visibleFrame {
-            let size = panel.frame.size
-            let finalOrigin = NSPoint(x: visible.midX - size.width / 2, y: visible.maxY - size.height - 8)
-            panel.setFrameOrigin(NSPoint(x: finalOrigin.x, y: finalOrigin.y + 24))
-            panel.alphaValue = 0
-            panel.makeKeyAndOrderFront(nil)
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.18
-                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                panel.animator().setFrameOrigin(finalOrigin)
-                panel.animator().alphaValue = 1
-            }
+        // Open at the text cursor; fall back to the mouse pointer when the app doesn't expose its caret.
+        let anchor = CaretLocator.caretRect() ?? NSRect(origin: NSEvent.mouseLocation, size: NSSize(width: 1, height: 1))
+        let screen = NSScreen.screens.first { $0.frame.intersects(anchor) } ?? NSScreen.main
+        guard let visible = screen?.visibleFrame else { return }
+        let size = panel.frame.size
+        let gap: CGFloat = 8
+        // Below the caret if it fits, otherwise above it.
+        var origin = NSPoint(x: anchor.minX - 20, y: anchor.minY - gap - size.height)
+        let opensUp = origin.y < visible.minY
+        if opensUp { origin.y = anchor.maxY + gap }
+        origin.x = min(max(origin.x, visible.minX + gap), visible.maxX - size.width - gap)
+        origin.y = min(max(origin.y, visible.minY + gap), visible.maxY - size.height - gap)
+
+        panel.setFrameOrigin(NSPoint(x: origin.x, y: origin.y + (opensUp ? -10 : 10)))
+        panel.alphaValue = 0
+        panel.makeKeyAndOrderFront(nil)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.16
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            panel.animator().setFrameOrigin(origin)
+            panel.animator().alphaValue = 1
         }
     }
 
@@ -94,10 +102,10 @@ private struct ClipboardListView: View {
                     .textFieldStyle(.plain)
                     .font(.system(size: 16))
                     .focused($searchFocused)
-                Text("↩ paste  esc close").font(.system(size: 11)).foregroundStyle(.tertiary)
+                Text("↩ paste").font(.system(size: 11)).foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 18)
-            .frame(height: 52)
+            .padding(.horizontal, 16)
+            .frame(height: 46)
 
             Divider()
 
@@ -125,7 +133,7 @@ private struct ClipboardListView: View {
                 }
             }
         }
-        .frame(width: 560, height: 420)
+        .frame(width: 480, height: 360)
         .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.regularMaterial))
         .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.primary.opacity(0.1)))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -176,7 +184,7 @@ private struct ClipRow: View {
                     }
                 }
             }
-            .frame(width: 120, alignment: .trailing)
+            .frame(width: 96, alignment: .trailing)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)

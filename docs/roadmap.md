@@ -66,6 +66,8 @@
 - [x] Text clipboard history saved in ~/Library/Application Support/Wand (100 items, data protection), skipping
       concealed and transient pasteboard types
 - [x] Drop-down panel: search, ↑/↓, Return pastes into the app in front (the panel never activates Wand), Esc, ⌘1–9
+- [x] The panel opens at the text cursor (Accessibility caret bounds), above it near the screen bottom, and falls back
+      to the mouse pointer when an app doesn't expose its caret. Verified the caret is found in TextEdit.
 - [x] Dashboard Clipboard page (on/off, list, copy, remove, clear) and a Home card; off by default for new users
 - [x] Verified (2026-10-15): copies captured with the source app; a concealed item was not stored
 - [ ] A person double-taps right ⌥ and pastes from the drop-down

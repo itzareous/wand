@@ -69,6 +69,9 @@ final class Agent {
         logPairingCode()
         ShortcutCatalog.validate()
         wireRightOption()
+        #if DEBUG
+        CaretLocator.startDebugLogging()
+        #endif
         let server = AgentServer(agent: self, serviceName: serviceName)
         self.server = server
         frontmostApp.onChange = { [weak server] context in
