@@ -15,12 +15,16 @@ struct MainWindow: View {
         Group {
             if agent.hasCompletedSetup {
                 HomeView(agent: agent)
+                    .frame(width: 560)
             } else {
-                SetupView(agent: agent)
+                OnboardingView(agent: agent)
+                    .frame(width: 880, height: 600)
             }
         }
-        .frame(width: 560)
         .onAppear {
+            #if DEBUG
+            OnboardingSnapshots.runIfRequested(agent: agent)
+            #endif
             let open = openWindow
             AppDelegate.openMainWindow = {
                 open(id: MainWindow.id)
@@ -32,154 +36,6 @@ struct MainWindow: View {
             } else {
                 NSApp.activate()
             }
-        }
-    }
-}
-
-// MARK: - Setup
-
-private struct SetupView: View {
-    let agent: Agent
-    @State private var step: Step = .welcome
-    @State private var pairedAtStart = 0
-    @State private var openAtLogin = true
-
-    enum Step: Int, CaseIterable { case welcome, permission, pair, done }
-
-    private let poll = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch step {
-                case .welcome: welcome
-                case .permission: permission
-                case .pair: pair
-                case .done: done
-                }
-            }
-            .frame(maxWidth: .infinity, minHeight: 360)
-            .padding(.horizontal, 40)
-            .padding(.top, 36)
-            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .leading).combined(with: .opacity)))
-
-            footer
-        }
-        .animation(.snappy(duration: 0.3), value: step)
-        .onAppear { pairedAtStart = agent.pairedDevices.count }
-        .onReceive(poll) { _ in agent.refreshAccessibility() }
-        .onChange(of: agent.pairedDevices.count) { _, count in
-            // A phone just paired with the code on screen: move on by itself.
-            if step == .pair, count > pairedAtStart { step = .done }
-        }
-    }
-
-    private var welcome: some View {
-        VStack(spacing: 16) {
-            WandMark(size: 72)
-            Text("Welcome to Wand")
-                .font(.largeTitle.weight(.semibold))
-            Text("Control this Mac from your iPhone: play and pause, volume, shortcuts for the app you're using, typing and switching apps.")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Text("Setup takes about a minute.")
-                .foregroundStyle(.tertiary)
-        }
-    }
-
-    private var permission: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            StepHeader(number: 1, title: "Let Wand control this Mac",
-                       detail: "Wand presses keys for you (play/pause, shortcuts, typing). macOS asks you to allow this once.")
-            StatusRow(ok: agent.hasAccessibility,
-                      okText: "Allowed. You're good to go.",
-                      pendingText: "Not allowed yet")
-            if !agent.hasAccessibility {
-                VStack(alignment: .leading, spacing: 8) {
-                    Button("Open System Settings") {
-                        SystemControl.requestAccessibility()
-                        SystemControl.openAccessibilitySettings()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.large)
-                    Text("Turn on **Wand** in Privacy & Security → Accessibility (shown as *Device Control and Data Access* on newer macOS). If Wand isn't listed, click **+** and choose it from Applications. This page updates by itself.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            Spacer(minLength: 0)
-        }
-    }
-
-    private var pair: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            StepHeader(number: 2, title: "Pair your iPhone",
-                       detail: "Your iPhone and this Mac need to be on the same Wi-Fi.")
-            PairingCard(agent: agent)
-            Spacer(minLength: 0)
-        }
-    }
-
-    private var done: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(.green)
-                .symbolEffect(.bounce, value: step)
-            Text("You're all set")
-                .font(.largeTitle.weight(.semibold))
-            Text("Wand lives in your menu bar. Open the Wand app on your iPhone to control this Mac.")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            Toggle("Open Wand when I log in", isOn: $openAtLogin)
-                .toggleStyle(.checkbox)
-                .padding(.top, 8)
-        }
-    }
-
-    private var footer: some View {
-        HStack {
-            StepDots(current: step.rawValue, count: Step.allCases.count)
-            Spacer()
-            if step == .permission || step == .pair {
-                Button("Skip") { advance() }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                    .padding(.trailing, 8)
-            }
-            Button(primaryTitle) { advance() }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
-                .controlSize(.large)
-                .keyboardShortcut(.defaultAction)
-                .disabled(step == .permission && !agent.hasAccessibility)
-        }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 20)
-    }
-
-    private var primaryTitle: String {
-        switch step {
-        case .welcome: "Get Started"
-        case .permission, .pair: "Continue"
-        case .done: "Done"
-        }
-    }
-
-    private func advance() {
-        if let next = Step(rawValue: step.rawValue + 1) {
-            if next == .pair { pairedAtStart = agent.pairedDevices.count }
-            step = next
-        } else {
-            agent.setOpensAtLogin(openAtLogin)
-            agent.hasCompletedSetup = true
         }
     }
 }
@@ -359,21 +215,8 @@ struct WandMark: View {
     }
 }
 
-private struct StepHeader: View {
-    let number: Int
-    let title: String
-    let detail: String
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Step \(number) of 2").font(.subheadline).foregroundStyle(.secondary)
-            Text(title).font(.title.weight(.semibold))
-            Text(detail).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}
-
-private struct StatusRow: View {
+struct StatusRow: View {
     let ok: Bool
     let okText: String
     let pendingText: String
@@ -386,21 +229,6 @@ private struct StatusRow: View {
     }
 }
 
-private struct StepDots: View {
-    let current: Int
-    let count: Int
-
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<count, id: \.self) { index in
-                Capsule()
-                    .fill(index == current ? Color.primary : Color.secondary.opacity(0.3))
-                    .frame(width: index == current ? 18 : 6, height: 6)
-            }
-        }
-        .animation(.snappy, value: current)
-    }
-}
 
 private struct StatusDotLabelStyle: LabelStyle {
     let color: Color
